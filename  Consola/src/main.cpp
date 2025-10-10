@@ -79,6 +79,49 @@ void setup() {
 
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  if (indexGame < 20) {
+    passwordGame[indexGame] = random(1, 10); // Guarda número aleatorio (1-9)
+    Serial.print("Numero agregado: ");
+    Serial.println(passwordGame[indexGame]);
+    indexGame++;
+  }
+
+  // MOSTRAR CLAVE GENERADA
+  Serial.print("Clave: ");
+  for (int i = 0; i < indexGame; i++) {
+    Serial.print(passwordGame[i]);
+    Serial.print(" ");
+  }
+  Serial.println("\n----------");
+
+  // JUGADOR INTENTA REPLICAR CLAVE
+  indexPlayer = 0;
+  while (indexPlayer < indexGame) {
+    char key = keypad.getKey(); 
+    if (key) {
+      passwordPlayer[indexPlayer] = String(key).toInt(); // convierte char '3' → int 3
+      Serial.print("Tecla elegida: ");
+      Serial.println(passwordPlayer[indexPlayer]);
+      indexPlayer++;
+    }
+  }
+
+  // Comparación
+  bool RondaPasada = true;
+  for (int i = 0; i < indexGame; i++) {
+    if (passwordGame[i] != passwordPlayer[i]) {
+      RondaPasada = false;
+      break;
+    }
+  }
+
+  if (RondaPasada) {
+    Serial.println("GG, pasaste la ronda!");
+  } else {
+    Serial.println("Fallaste! Buena suerte la prox.");
+    while (1); // detener el juego
+  }
+
+  delay(1000);
 
 }
