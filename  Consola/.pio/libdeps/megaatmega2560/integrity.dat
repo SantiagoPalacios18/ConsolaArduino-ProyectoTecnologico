@@ -1,3 +1,4 @@
+adafruit/Adafruit ILI9341 @ ^1.6.1
 chris--a/Keypad@^3.1.1ia Keyp
 adafruit/Adafruit GFX Library@^1.12.3
-adafruit/Adafruit ILI9341 @ ^1.6.1
+monitor_speed = 9600
