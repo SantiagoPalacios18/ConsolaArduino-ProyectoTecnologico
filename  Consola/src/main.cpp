@@ -1,5 +1,6 @@
 #include <Adafruit_ILI9341.h>
 #include <SPI.h>
+#include <Keypad.h>
 
 const int CSv = 45;
 const int RSTv = 47;
@@ -13,6 +14,14 @@ const int MISOv = 50;
 #define TFT_RST RSTv
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
+
+//Bitmaps - Organizados en Spritesheets para animaciones
+
+
+
+//Animaciones
+
+
 
 void setup() {
   Serial.begin(9600);

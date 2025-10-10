@@ -10,6 +10,7 @@
             "includePath": [
                 "d:/Users/Santiago/Desktop/Consola Proyecto/ Consola/include",
                 "d:/Users/Santiago/Desktop/Consola Proyecto/ Consola/src",
+                "d:/Users/Santiago/Desktop/Consola Proyecto/ Consola/.pio/libdeps/megaatmega2560/Keypad/src",
                 "d:/Users/Santiago/Desktop/Consola Proyecto/ Consola/.pio/libdeps/megaatmega2560/Adafruit ILI9341",
                 "d:/Users/Santiago/Desktop/Consola Proyecto/ Consola/.pio/libdeps/megaatmega2560/Adafruit GFX Library",
                 "d:/Users/Santiago/Desktop/Consola Proyecto/ Consola/.pio/libdeps/megaatmega2560/Adafruit BusIO",
@@ -31,6 +32,7 @@
                 "path": [
                     "d:/Users/Santiago/Desktop/Consola Proyecto/ Consola/include",
                     "d:/Users/Santiago/Desktop/Consola Proyecto/ Consola/src",
+                    "d:/Users/Santiago/Desktop/Consola Proyecto/ Consola/.pio/libdeps/megaatmega2560/Keypad/src",
                     "d:/Users/Santiago/Desktop/Consola Proyecto/ Consola/.pio/libdeps/megaatmega2560/Adafruit ILI9341",
                     "d:/Users/Santiago/Desktop/Consola Proyecto/ Consola/.pio/libdeps/megaatmega2560/Adafruit GFX Library",
                     "d:/Users/Santiago/Desktop/Consola Proyecto/ Consola/.pio/libdeps/megaatmega2560/Adafruit BusIO",
