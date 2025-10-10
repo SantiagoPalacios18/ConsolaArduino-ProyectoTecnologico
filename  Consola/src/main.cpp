@@ -74,7 +74,6 @@ void setup() {
   }
   Serial.print("Nombre Ingresado:");
   Serial.println(userName);
-  Serial.print
 }
 
 
