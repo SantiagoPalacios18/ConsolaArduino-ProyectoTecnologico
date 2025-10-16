@@ -15,7 +15,6 @@ const int MISOv = 50;
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
-//Bitmaps - Organizados en Spritesheets para animaciones
 // Definimos el número de filas y columnas del keypad
 const byte ROWS = 4;
 const byte COLS = 4;
@@ -40,9 +39,12 @@ String userName = "";
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
+//Bitmaps - Organizados en Spritesheets para animaciones
+
 
 
 //Animaciones
+
 
 
 void setup() {
