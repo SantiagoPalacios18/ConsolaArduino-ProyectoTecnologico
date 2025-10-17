@@ -1,4 +1,5 @@
-<img width="382" height="162" alt="image" src="https://github.com/user-attachments/assets/3bc9ee2b-4feb-47f6-adda-38a5cfaeaf2f" />    <img width="162" height="162" alt="image" src="https://github.com/user-attachments/assets/5ce1c368-80b5-4c63-b79b-115d7ea1805b" />
+<img width="382" height="162" alt="image" src="https://github.com/user-attachments/assets/3bc9ee2b-4feb-47f6-adda-38a5cfaeaf2f" />    <img width="162" height="162" alt="image" src="https://github.com/user-attachments/assets/5ce1c368-80b5-4c63-b79b-115d7ea1805b" />   <img width="162" height="162" alt="image" src="https://github.com/user-attachments/assets/53ae34ab-d786-4edc-93b2-f157c27b4049" />
+
 
 
 El repositorio se vincula a Visual Studio, que incluye la extencion Wokwi para la creacion y simulado de circuitos virtuales. 
