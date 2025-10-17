@@ -1,10 +1,12 @@
 <img width="382" height="162" alt="image" src="https://github.com/user-attachments/assets/3bc9ee2b-4feb-47f6-adda-38a5cfaeaf2f" />    <img width="162" height="162" alt="image" src="https://github.com/user-attachments/assets/5ce1c368-80b5-4c63-b79b-115d7ea1805b" />
 
 
-El repositorio se vincula a Visual Studio, que incluye la extencion Wokwi para la creacion y simulado de circuitos virtuales. (Wokwi: https://wokwi.com/) <img width="45" height="45" alt="image" src="https://github.com/user-attachments/assets/3469c740-45d3-4849-bf17-dc88a74bc459" />
+El repositorio se vincula a Visual Studio, que incluye la extencion Wokwi para la creacion y simulado de circuitos virtuales. 
+(Wokwi: https://wokwi.com/) <img width="45" height="45" alt="image" src="https://github.com/user-attachments/assets/3469c740-45d3-4849-bf17-dc88a74bc459" />
 
 
-El diseño de la consola se encuentra como modelo 3D dentro de Tynkercad: https://www.tinkercad.com/things/aKRFVF8pyIM/edit?returnTo=%2Fdashboard&sharecode=nQQV0NiSc4aEKMLI6XLve5ipKrq08SxiD2S4R_nGxTE <img width="45" height="45" alt="image" src="https://github.com/user-attachments/assets/45a75716-8dda-4706-b634-b303b7bc02e4" />
+El diseño de la consola se encuentra como modelo 3D dentro de Tynkercad: 
+https://www.tinkercad.com/things/aKRFVF8pyIM/edit?returnTo=%2Fdashboard&sharecode=nQQV0NiSc4aEKMLI6XLve5ipKrq08SxiD2S4R_nGxTE <img width="45" height="45" alt="image" src="https://github.com/user-attachments/assets/45a75716-8dda-4706-b634-b303b7bc02e4" />
 
 
   El proyecto fue diseñado por el grupo 14 de la materia Proyecto Tecnologico de la Escuela Tecnica 36 durante el ciclo escolar 2025, 4 año tercera division, el objetivo es crear una consola 
