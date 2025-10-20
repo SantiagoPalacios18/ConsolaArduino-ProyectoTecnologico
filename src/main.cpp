@@ -91,18 +91,36 @@ void setup() {
   tft.setRotation(3);      // Ajusta la rotación (0-3)
   tft.fillScreen(ILI9341_BLACK);  // Limpiar pantalla con negro
 
-  // Mostrar texto simple
-  tft.setTextSize(2);
-  tft.setTextColor(ILI9341_WHITE);
-  tft.setCursor(10, 10);
-  tft.println("Hola TFT 2.8\"");
+  // Base de diseño
+  // Fondo gris oscuro
+  tft.fillScreen(ILI9341_DARKGREY);
   
-  // Dibujar un rectángulo rojo
-  tft.fillRect(50, 50, 100, 50, ILI9341_YELLOW);
+  // Dibujar indicadores de colores a la izquierda
+  drawColorBox(10, 20, ILI9341_RED);
+  drawColorBox(10, 60, ILI9341_ORANGE);
+  drawColorBox(10, 100, ILI9341_YELLOW);
+  drawColorBox(10, 140, ILI9341_GREEN);
+  
+  // Dibujar barra vertical blanca/negra (marcador) a la derecha
+  drawMarkerBar(tft.width() - 30, 20, 20, 140);
 
-  tft.drawRGBBitmap(0, 208, horseTest, 32, 32);
-  tft.drawRGBBitmap(0, 0, roblox, 32, 32);
-  tft.drawRGBBitmap(100, 100, caminar1, 32, 32);
+  // Dibujar pista en la parte inferior (barra negra)
+  tft.fillRect(50, tft.height() - 50, tft.width() - 100, 30, ILI9341_BLACK);
+  
+  // Dibujar posiciones de caballos (verde - amarillo - verde)
+  int baseY = tft.height() - 45;
+  int blockWidth = 20;
+  int blockHeight = 25;
+  
+  // Cuadro verde - posición izquierda
+  tft.fillRect(70, baseY, blockWidth, blockHeight, ILI9341_GREEN);
+  
+  // Cuadro amarillo - posición centro
+  tft.fillRect(90, baseY, blockWidth, blockHeight, ILI9341_YELLOW);
+  
+  // Cuadro verde - posición derecha
+  tft.fillRect(110, baseY, blockWidth, blockHeight, ILI9341_GREEN);
+
 
   randomSeed(analogRead(A0)); // Semilla aleatoria unica
   Serial.println("Bienvenido a nuestro proyecto! Ingrese su nombre de usuario:");
