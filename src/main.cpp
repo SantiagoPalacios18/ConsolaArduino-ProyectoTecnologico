@@ -1,6 +1,7 @@
 #include <Adafruit_ILI9341.h>
 #include <SPI.h>
 #include <Keypad.h>
+#include <Adafruit_GFX.h>
 
 const int CSv = 45;
 const int RSTv = 47;
@@ -28,14 +29,18 @@ char keys[ROWS][COLS] = {
 };
 
 // Pines del Arduino conectados al teclado
-byte rowPins[ROWS] = {3, 4, 5, 6};  
-byte colPins[COLS] = {7, 8, 9 ,10};  
+byte rowPins[ROWS] = {2, 3, 4, 5};  
+byte colPins[COLS] = {6, 7, 8 ,9};  
+
+int selectedGame = 0;
 
 byte passwordGame[3]; 
-byte passwordPlayer[3]; 
+byte passwordPlayer[3];
+bool rondaPasada;
 int indexGame = 0; 
 int indexPlayer = 0;
 String userName = "";
+
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
@@ -83,7 +88,22 @@ const uint16_t caminar1[32 * 32] PROGMEM = { 0x0000, 0x0000, 0x0000, 0x0000, 0x0
 
 //Animaciones
 
+void drawColorBox(int x, int y, int width , int height, uint16_t color) {
+  tft.fillRect(x, y, width, height, color);
+}
 
+void drawMarkerBar(int x, int y, int width, int height) {
+  int blockHeight = 10;
+  bool white = true;
+  for (int i = 0; i < height; i += blockHeight) {
+    if (white) {
+      tft.fillRect(x, y + i, width, blockHeight, ILI9341_WHITE);
+    } else {
+      tft.fillRect(x, y + i, width, blockHeight, ILI9341_BLACK);
+    }
+    white = !white;
+  }
+}
 
 void setup() {
   Serial.begin(9600);
@@ -92,34 +112,31 @@ void setup() {
   tft.fillScreen(ILI9341_BLACK);  // Limpiar pantalla con negro
 
   // Base de diseño
-  // Fondo gris oscuro
+
   tft.fillScreen(ILI9341_DARKGREY);
   
-  // Dibujar indicadores de colores a la izquierda
-  drawColorBox(10, 20, ILI9341_RED);
-  drawColorBox(10, 60, ILI9341_ORANGE);
-  drawColorBox(10, 100, ILI9341_YELLOW);
-  drawColorBox(10, 140, ILI9341_GREEN);
+  // Dibujo de caballos
+  drawColorBox(10, 20, 30, 20, ILI9341_RED);
+  drawColorBox(10, 60, 30, 20, ILI9341_ORANGE);
+  drawColorBox(10, 100, 30, 20, ILI9341_YELLOW);
+  drawColorBox(10, 140, 30, 20, ILI9341_GREEN);
   
-  // Dibujar barra vertical blanca/negra (marcador) a la derecha
-  drawMarkerBar(tft.width() - 30, 20, 20, 140);
+  // Dibujo de la meta
+  drawMarkerBar(tft.width() - 30, 15, 20, 160);
 
-  // Dibujar pista en la parte inferior (barra negra)
-  tft.fillRect(50, tft.height() - 50, tft.width() - 100, 30, ILI9341_BLACK);
-  
-  // Dibujar posiciones de caballos (verde - amarillo - verde)
-  int baseY = tft.height() - 45;
-  int blockWidth = 20;
-  int blockHeight = 25;
-  
-  // Cuadro verde - posición izquierda
-  tft.fillRect(70, baseY, blockWidth, blockHeight, ILI9341_GREEN);
+  // Barra de ataque
+  tft.fillRect(10 , tft.height() - 40, tft.width() - 20, 30, ILI9341_BLACK);
+    // Cuadro verde - posición izquierda
+  tft.fillRect(tft.width()/3 , tft.height() - 40, tft.width()/3, 30, ILI9341_GREEN);
   
   // Cuadro amarillo - posición centro
-  tft.fillRect(90, baseY, blockWidth, blockHeight, ILI9341_YELLOW);
+  tft.fillRect(tft.width()/2 -10 , tft.height() - 40, 20, 30, ILI9341_YELLOW);
+
+
+
   
   // Cuadro verde - posición derecha
-  tft.fillRect(110, baseY, blockWidth, blockHeight, ILI9341_GREEN);
+  // tft.fillRect(110, baseY, blockWidth, blockHeight, ILI9341_GREEN);
 
 
   randomSeed(analogRead(A0)); // Semilla aleatoria unica
@@ -139,49 +156,78 @@ void setup() {
 
 
 void loop() {
-  if (indexGame < 20) {
-    passwordGame[indexGame] = random(1, 10); // Guarda número aleatorio (1-9)
-    Serial.print("Numero agregado: ");
-    Serial.println(passwordGame[indexGame]);
-    indexGame++;
-  }
+  if (selectedGame == 0){
+  	// Cambiar los prints por cosas mostradas en la pantalla
+  	Serial.println("Ingrese el juego a seleccionar: A-Simon B-Caballos");
+    while (selectedGame == 0){
+      char key = keypad.getKey();
+      if (key){
+        if (key == 'A'){
+          Serial.println("Juego seleccionado: Simon");
+          selectedGame = 1;
+        } else if (key == 'B'){
+          Serial.println("Juego seleccionado: Caballos");
+          selectedGame = 2;
+        } else {
+        	Serial.println("Tecla no valida");
+        }
+        
 
-  // MOSTRAR CLAVE GENERADA
-  Serial.print("Clave: ");
-  for (int i = 0; i < indexGame; i++) {
-    Serial.print(passwordGame[i]);
-    Serial.print(" ");
-  }
-  Serial.println("\n----------");
-
-  // JUGADOR INTENTA REPLICAR CLAVE
-  indexPlayer = 0;
-  while (indexPlayer < indexGame) {
-    char key = keypad.getKey(); 
-    if (key) {
-      passwordPlayer[indexPlayer] = String(key).toInt(); // convierte char '3' → int 3
-      Serial.print("Tecla elegida: ");
-      Serial.println(passwordPlayer[indexPlayer]);
-      indexPlayer++;
+      }
     }
   }
+  if (selectedGame == 1){
 
-  // Comparación
-  bool RondaPasada = true;
-  for (int i = 0; i < indexGame; i++) {
-    if (passwordGame[i] != passwordPlayer[i]) {
-      RondaPasada = false;
-      break;
+    if (indexGame < 20) {
+      passwordGame[indexGame] = random(1, 10); // Guarda número aleatorio (1-9)
+      Serial.print("Numero agregado: ");
+      Serial.println(passwordGame[indexGame]);
+      indexGame++;
     }
+
+    // MOSTRAR CLAVE GENERADA
+    Serial.print("Clave: ");
+    for (int i = 0; i < indexGame; i++) {
+      Serial.print(passwordGame[i]);
+      Serial.print(" ");
+    }
+    Serial.println("\n----------");
+
+    // JUGADOR INTENTA REPLICAR CLAVE
+    indexPlayer = 0;
+    while (indexPlayer < indexGame) {
+      char key = keypad.getKey(); 
+      if (key) {
+        if (key >= '0' && key <= '9') {
+
+          passwordPlayer[indexPlayer] = key - '0'; // convierte char '3' → int 3
+          Serial.print("Tecla elegida: ");
+          Serial.println(passwordPlayer[indexPlayer]);
+          indexPlayer++;
+        } else {
+          Serial.println("Tecla no válida");
+          rondaPasada = false;
+          break;
+        }
+      }
+    }
+
+    // Comparación
+    bool rondaPasada = true;
+    for (int i = 0; i < indexGame; i++) {
+      if (passwordGame[i] != passwordPlayer[i]) {
+        rondaPasada = false;
+        break;
+      }
+    }
+
+    if (rondaPasada) {
+      Serial.println("GG, pasaste la ronda!");
+    } else {
+      Serial.println("Fallaste! Buena suerte la prox.");
+      while (1); // detener el juego
+    }
+
+    delay(1000);
   }
-
-  if (RondaPasada) {
-    Serial.println("GG, pasaste la ronda!");
-  } else {
-    Serial.println("Fallaste! Buena suerte la prox.");
-    while (1); // detener el juego
-  }
-
-  delay(1000);
-
 }
