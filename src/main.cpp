@@ -29,6 +29,16 @@ char keys[ROWS][COLS] = {
   {'*','0','#','D'}
 };
 
+int matrizSimon[3][3] = { // Esto es para obtener la fila y col del número para editar, creo que es lo más eficiente que podemos hacer
+  {1, 2, 3},
+  {4, 5, 6},
+  {7, 8, 9}
+};
+
+int colorRGB;
+int filaNumero = -1;
+int colNumero = -1;
+
 const int RondasMaximas = 20;
 
 // Pines del Arduino conectados al teclado
@@ -128,6 +138,26 @@ void drawMarkerBar(int x, int y, int width, int height) {
   }
 }
 
+int drawSquareSimonGame(int row, int col,int num, bool pressed){
+  
+  if (pressed == false) colorRGB = tft.color565(40, 112, 181); else colorRGB = tft.color565(27, 77, 125);
+
+  // Establecer posiciones de x e y
+  int x = tft.width()/2 - 80 + col * (50 + 5);  // posición x
+  int y = 40 + row * (50 + 5);  // posición y
+  
+  // Cuadro
+  drawColorBox(x, y, 50, 50, colorRGB);  
+  
+  // Texto
+  tft.setTextColor(tft.color565(191, 191, 191));
+  tft.setTextSize(3);
+  tft.setCursor(x + 18, y + 15);
+  tft.print(num++); // Escribe el número de la posición, y luego le suma 1
+  
+  return num;
+}
+
 void drawHorsesGameBase(){
   tft.fillScreen(ILI9341_DARKGREY);
   
@@ -149,6 +179,21 @@ void drawHorsesGameBase(){
   tft.fillRect(tft.width()/2 -10 , tft.height() - 40, 20, 30, ILI9341_YELLOW);
 }
 
+void drawSimonGameBase() {
+
+  // Fondo del juego
+  tft.fillScreen(tft.color565(0, 102, 204));
+  drawColorBox(20, 20, tft.width() - 40, tft.height() - 40, tft.color565(102, 178, 255));
+
+  // Dibujar los 9 cuadros azul oscuro con números
+  int num = 1;
+  for (int row = 0; row < 3; row++) {
+    for (int col = 0; col < 3; col++) {
+      drawSquareSimonGame(row, col, num, false);
+      num++;
+    }
+  }
+}
 
 //-------------------- PROGRAMA PRINCIPAL --------------------//
 
@@ -189,12 +234,32 @@ void loop() {
       indexGame++;
     }
 
-    // MOSTRAR CLAVE GENERADA
+    //---MOSTRAR CLAVE GENERADA---//
+      // Parte TERMINAL
     Serial.print("Clave: ");
     for (int i = 0; i < indexGame; i++) {
+      
       Serial.print(passwordGame[i]);
       Serial.print(" ");
+      
+       // Reiniciar fila y columna antes de buscar
+      filaNumero = -1;
+      colNumero = -1;
+      // Parte TFT
+          // Encontrar fila y columna del número
+      for (int fila = 0; fila < 3; fila++){
+        for(int col = 0; col < 3; col++){
+          if (matrizSimon[fila][col] == passwordGame[i]){ 
+            filaNumero = fila;
+            colNumero = col;
+            break; // Salimos del for de columnas
+          }
+        }
+        if (filaNumero != -1 and colNumero != -1) break; // Salimos del for de filas, -1 era el valor predefinido, -1 = no encontrado
+      }
+      drawSquareSimonGame(filaNumero, colNumero, passwordGame[i], true);
     }
+
     Serial.println("\n----------");
 
     // JUGADOR INTENTA REPLICAR CLAVE
@@ -234,9 +299,7 @@ void loop() {
 
     delay(1000);
   }
-  else if (gameState == 2){ // Iniciador del juego 2 (gameState == 3)
-    drawHorsesGameBase();
-    gameState = 3;
+  else if (gameState == 2){ // Juego N2: Carrera de caballos con 4 jugadores
+
   }
-  else if (gameState == 3){} // Juego N2: Carrera de caballos con 4 jugadores
 }
