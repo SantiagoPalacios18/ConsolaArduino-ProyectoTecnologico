@@ -214,19 +214,18 @@ void setup() {
     }
   }
   Serial.print("Nombre Ingresado:");
-  Serial.println(userName);*/
+  Serial.println(userName);*/                      //Deje esto como comentario para testear el tft, usalo cuando necesites
 
-  
 }
 
 void loop() {
-  
+
   if (gameState == 0){
     gameState = menu(2);
+    tft.fillScreen(ILI9341_BLACK);
   }
 
   if (gameState == 1){ // Juego N1: Simon Dice
-
     if (indexGame < RondasMaximas) {
       passwordGame[indexGame] = random(1, 10);
       Serial.print("Numero agregado: ");
