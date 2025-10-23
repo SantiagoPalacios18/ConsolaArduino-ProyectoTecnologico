@@ -179,6 +179,7 @@ void checkLeaderboard(int puntaje) {
 byte passwordGame[RondasMaximas]; 
 byte passwordPlayer[RondasMaximas];
 bool rondaPasada;
+int puntajeSimon = 0;
 int indexGame = 0; 
 int indexPlayer = 0;
 String userName = "";
@@ -310,6 +311,12 @@ void drawSimonGameBase() {
   }
 }
 
+int pointsCalculator(int basePoints, float multiplier){
+  int realScore = basePoints * multiplier;
+  return realScore;
+}
+
+
 //-------------------- PROGRAMA PRINCIPAL --------------------//
 
 void setup() {
@@ -345,8 +352,11 @@ void loop() {
     gameState = menu(2);
     tft.fillScreen(ILI9341_BLACK);
   }
+  if (gameState == 10){ // que 10 sea el iniciador del juego, y 1 cuando se está jugando (para no hacer otra variable), aplicar lo mismo con juego 2
 
+  }
   if (gameState == 1){ // Juego N1: Simon Dice
+    puntajeSimon = 0;
     if (indexGame < RondasMaximas) {
       passwordGame[indexGame] = random(1, 10);
       Serial.print("Numero agregado: ");
@@ -411,8 +421,10 @@ void loop() {
     }
 
     if (rondaPasada) {
+      puntajeSimon += 1;
       Serial.println("GG, pasaste la ronda!");
     } else {
+      
       Serial.println("Fallaste! Buena suerte la prox.");
       while (1);
     }
