@@ -104,6 +104,12 @@ char letras[26] = {
   'A','B','C','D','E','F','G','H','I','J','K','L','M',
   'N','O','P','Q','R','S','T','U','V','W','X','Y','Z'
 };
+
+const uint16_t *letrasBitmap[26] = {
+  A, B, C, D, E, F, G, H, I, J, K, L, M,
+  N, O, P, Q, R, S, T, U, V, W, X, Y, Z
+};
+
 String nombre1 = "XXX";
 String nombre2 = "XXX";
 String nombre3 = "XXX";
@@ -119,9 +125,16 @@ int puntaje4 = 0;
 int puntaje5 = 0;
 LinkedList<int> lbPuntajes;
 
-void updLB(int p1, int p2, int p3, int p4, int p5){
+void mostrarLetra(int pos, int letraN){
+  const uint16_t *letra = letrasBitmap[letraN];
+  drawScaledRGBBitmapFloat(tft, pos, 110, letra, 11, 11, 6);
+}
+
+void updLB(int p1, int p2, int p3, int p4, int p5, String n1, String n2, String n3, String n4, String n5){
   lbPuntajes.clear();
   lbPuntajes.add(p1); lbPuntajes.add(p2); lbPuntajes.add(p3); lbPuntajes.add(p4); lbPuntajes.add(p5);
+  lbNombres.clear();
+  lbNombres.add(n1); lbNombres.add(n2); lbNombres.add(n3); lbNombres.add(n4); lbNombres.add(n5);
 }
 
 String selectName(){
@@ -130,34 +143,41 @@ String selectName(){
   for (int i = 0; i < 3; i++){
     bool selec = false;
     int letraN = 0;
+    int posicion[] = {22, 112, 202};
+    bool letraM = false; // Indica si la letra ya se printeo en la TFT
     while (selec == false){
+      if (letraM == false) mostrarLetra(posicion[i], letraN);
+      letraM = true;
       char key = keypad.getKey();
       //Se presiona la flecha ->
-      if (key == '4'){
-        if (letraN == 25){
-          letraN = 0;
+      if (key){
+        if (key == '4'){
+          if (letraN == 25){
+            letraN = 0;
+          }
+          else{
+            letraN++;
+          }
+          Serial.print(letraN);
+          letraM = false;
         }
-        else{
-          letraN++;
+        //Se presiona la flecha <-
+        else if (key == '*'){
+          if (letraN == 0){
+            letraN = 25;
+          }
+          else{
+            letraN--;
+          }
+          Serial.print(letraN);
+          letraM = false;
         }
-        Serial.print(letraN);
-      }
-      //Se presiona la flecha <-
-      else if (key == '*'){
-        if (letraN == 0){
-          letraN = 25;
+        //Se presiona Enter
+        else if (key == '7'){
+          name += letras[letraN];
+          Serial.print(name);
+          selec = true;
         }
-        else{
-          letraN--;
-        }
-        Serial.print(letraN);
-        
-      }
-      //Se presiona Enter
-      else if (key == '7'){
-        name += letras[letraN];
-        Serial.print(name);
-        selec = true;
       }
     }
   }
@@ -165,14 +185,59 @@ String selectName(){
 }
 
 void checkLeaderboard(int puntaje) {
-
   if (puntaje > lbPuntajes.get(1)){
     puntaje5 = puntaje4;
     puntaje4 = puntaje3;
     puntaje3 = puntaje2;
     puntaje2 = puntaje1;
     puntaje1 = puntaje;
-    updLB(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5);
+    String nombre = selectName();
+    nombre5 = nombre4;
+    nombre4 = nombre3;
+    nombre3 = nombre2;
+    nombre2 = nombre1;
+    nombre1 = nombre;
+    updLB(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
+  }
+  else if (puntaje > lbPuntajes.get(2)){
+    puntaje5 = puntaje4;
+    puntaje4 = puntaje3;
+    puntaje3 = puntaje2;
+    puntaje2 = puntaje;
+    String nombre = selectName();
+    nombre5 = nombre4;
+    nombre4 = nombre3;
+    nombre3 = nombre2;
+    nombre2 = nombre;
+    updLB(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
+  }
+  else if (puntaje > lbPuntajes.get(3)){
+    puntaje5 = puntaje4;
+    puntaje4 = puntaje3;
+    puntaje3 = puntaje;
+    String nombre = selectName();
+    nombre5 = nombre4;
+    nombre4 = nombre3;
+    nombre3 = nombre;
+    updLB(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
+  }
+  else if (puntaje > lbPuntajes.get(4)){
+    puntaje5 = puntaje4;
+    puntaje4 = puntaje;
+    String nombre = selectName();
+    nombre5 = nombre4;
+    nombre4 = nombre;
+    updLB(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
+  }
+  else if (puntaje > lbPuntajes.get(5)){
+    puntaje5 = puntaje;
+    String nombre = selectName();
+    nombre5 = nombre;
+    updLB(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
+  }
+
+  void showLeaderboard(){
+    
   }
 }
 
@@ -337,12 +402,11 @@ void setup() {
   }
   Serial.print("Nombre Ingresado:");
   Serial.println(userName);*/                      //Deje esto como comentario para testear el tft, usalo cuando necesite
-  drawScaledRGBBitmapFloat(tft, 0, 0, Z, 11, 11, 6);
   lbNombres.add(nombre1); lbNombres.add(nombre2); lbNombres.add(nombre3); lbNombres.add(nombre4); lbNombres.add(nombre5);
   lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1);
 
   while (0 == 0){
-    String name = selectName();
+    checkLeaderboard(1000);
   }
 }
 
