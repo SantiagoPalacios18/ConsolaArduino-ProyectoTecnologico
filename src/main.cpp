@@ -236,8 +236,10 @@ void checkLeaderboard(int puntaje) {
     updLB(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
   }
 
-  void showLeaderboard(){
-    
+  void showLeaderboard(int p1, int p2, int p3, int p4, int p5, String n1, String n2, String n3, String n4, String n5){
+    tft.setTextSize(4);
+    tft.setCursor(40, 60);
+      tft.printIn();
   }
 }
 
