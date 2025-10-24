@@ -118,11 +118,11 @@ String nombre5 = "XXX";
 
 LinkedList<String> lbNombres;
 
-int puntaje1 = 0;
-int puntaje2 = 0;
-int puntaje3 = 0;
-int puntaje4 = 0;
-int puntaje5 = 0;
+int puntaje1 = 60;
+int puntaje2 = 40;
+int puntaje3 = 20;
+int puntaje4 = 10;
+int puntaje5 = 5;
 LinkedList<int> lbPuntajes;
 
 void mostrarLetra(int pos, int letraN){
@@ -140,10 +140,13 @@ void updLB(int p1, int p2, int p3, int p4, int p5, String n1, String n2, String 
 String selectName(){
   String name = "";
   Serial.print("Pon tus iniciales");
+  tft.setCursor(40, 50);
+  tft.setTextSize(2);
+  tft.println("Nuevo puntaje mas alto, ingrese su nombre");
   for (int i = 0; i < 3; i++){
     bool selec = false;
     int letraN = 0;
-    int posicion[] = {22, 112, 202};
+    int posicion[] = {37, 127, 217};
     bool letraM = false; // Indica si la letra ya se printeo en la TFT
     while (selec == false){
       if (letraM == false) mostrarLetra(posicion[i], letraN);
@@ -184,9 +187,46 @@ String selectName(){
   return name;
 }
 
+void showLeaderboard(int p1, int p2, int p3, int p4, int p5, String n1, String n2, String n3, String n4, String n5){
+  tft.setTextSize(4);
+  tft.setCursor(40, 10);
+    tft.println("LEADERBOARD");
+  tft.setTextSize(4);
+  for (int i = 0; i < 10; i++){ 
+    int p = 0;
+    if (i % 2 != 0){
+      p = 40; //Columna puntajes
+    }
+    else{
+      p = 200; //Columna Nombres
+    }
+    
+    int h = 0;
+    if(i <= 2){h = 50;}
+    if(i <= 4 && i > 2){h = 90;};
+    if(i <= 6 && i > 4){h = 130;};
+    if(i <= 8 && i > 6){h = 170;};
+    if(i <= 10 && i > 8){h = 210;};
+
+    tft.setCursor(p, h);
+
+    if(i == 1){tft.println(n1);}
+    else if(i == 2){tft.println(p1);}
+    else if(i == 3){tft.println(n2);}
+    else if(i == 4){tft.println(p2);}
+    else if(i == 5){tft.println(n3);}
+    else if(i == 6){tft.println(p3);}
+    else if(i == 7){tft.println(n4);}
+    else if(i == 8){tft.println(p4);}
+    else if(i == 9){tft.println(n5);}
+    else if(i == 10){tft.println(p5);}
+  }
+}
+
 void checkLeaderboard(int puntaje) {
   if (puntaje > lbPuntajes.get(1)){
     puntaje5 = puntaje4;
+    Serial.print(puntaje5);
     puntaje4 = puntaje3;
     puntaje3 = puntaje2;
     puntaje2 = puntaje1;
@@ -236,11 +276,8 @@ void checkLeaderboard(int puntaje) {
     updLB(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
   }
 
-  void showLeaderboard(int p1, int p2, int p3, int p4, int p5, String n1, String n2, String n3, String n4, String n5){
-    tft.setTextSize(4);
-    tft.setCursor(40, 60);
-      tft.printIn();
-  }
+  tft.fillScreen(ILI9341_BLACK);
+  showLeaderboard(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
 }
 
 byte passwordGame[RondasMaximas]; 
@@ -409,6 +446,10 @@ void setup() {
 
   while (0 == 0){
     checkLeaderboard(1000);
+    while (0 == 0){
+      int x = 1;
+      Serial.print(x);
+    }
   }
 }
 
