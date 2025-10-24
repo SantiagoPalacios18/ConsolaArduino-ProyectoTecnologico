@@ -186,7 +186,6 @@ String selectName(){
   }
   return name;
 }
-
 void showLeaderboard(int p1, int p2, int p3, int p4, int p5, String n1, String n2, String n3, String n4, String n5){
   tft.setTextSize(4);
   tft.setCursor(40, 10);
@@ -280,25 +279,45 @@ void checkLeaderboard(int puntaje) {
   showLeaderboard(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
 }
 
-byte passwordGame[RondasMaximas]; 
+byte passwordGame[RondasMaximas];
 byte passwordPlayer[RondasMaximas];
-bool rondaPasada;
+bool rondaPasada = true;
 int puntajeSimon = 0;
-int indexGame = 0; 
+int indexGame = 0;
 int indexPlayer = 0;
 String userName = "";
 
 //-------------------- FUNCIONES --------------------//
 
+void gameOverScreen(){
+  tft.fillScreen(ILI9341_RED);
+  tft.setCursor(tft.width()/2 - 50, 100);
+  tft.setTextSize(4);
+  tft.setTextColor(tft.color565(255, 255, 255));
+  tft.println("GAME OVER");
+ 
+  tft.setCursor(tft.width()/3 - 50, 150);
+  tft.setTextSize(2);
+  tft.setTextColor(tft.color565(255, 255, 255));
+  tft.println("¿Volver a jugar?");
+}
+
+void showPointsSimon(int points){
+  tft.fillRect(255, 20, 35, 35, tft.color565(191, 191, 191));
+  tft.setCursor(265, 30);
+  tft.setTextSize(3);
+  tft.setTextColor(tft.color565(255, 255, 255));
+  tft.println(points);
+}
+
 int menu(int cantJuegos) {
   int end = 0;
   int juegoSelec = 1;
-  bool mostrarSimon = false;
-  bool mostrarCaballos = false;
+  int showGame = 2;
   while (end == 0) {
 
     char key = keypad.getKey();
-    
+   
     if (key) {
       if (key == '4' && juegoSelec < cantJuegos){
         juegoSelec += 1;
@@ -308,32 +327,31 @@ int menu(int cantJuegos) {
       }
       else if (key == '7'){
         end = 1;
+        juegoSelec *= 10;
       }
     }
 
-    if (juegoSelec == 1 && mostrarSimon == false) {
-      mostrarSimon = true;
+    if (juegoSelec == 1 && showGame == 2) {
+      showGame = 1;
       tft.fillRect(48, 16, 280, 44, 0x0000);
       tft.setTextSize(4);
       tft.setTextColor(ILI9341_WHITE);
       tft.setCursor(48, 16);
-      tft.println("Simon dice"); 
+      tft.println("Simon dice");
       tft.drawRGBBitmap(64, 128, logoSimonDice_select, 64, 64);
       tft.drawRGBBitmap(192, 128, logoSimonDice, 64, 64);
-      mostrarCaballos = false;
       Serial.print(key);
     }
-    
-    else if (juegoSelec == 2 && mostrarCaballos == false) {
-      mostrarCaballos = true;
+   
+    else if (juegoSelec == 2 && showGame == 1) {
+      showGame = 2;
       tft.fillRect(48, 16, 280, 44, 0x0000);
       tft.setTextSize(2);
       tft.setTextColor(ILI9341_WHITE);
       tft.setCursor(48, 16);
-      tft.println("Carrera de caballos"); 
+      tft.println("Carrera de caballos");
       tft.drawRGBBitmap(64, 128, logoSimonDice, 64, 64);
       tft.drawRGBBitmap(192, 128, logoSimonDice_select, 64, 64);
-      mostrarSimon = false;
       Serial.print(key);
     }
   }
@@ -358,35 +376,44 @@ void drawMarkerBar(int x, int y, int width, int height) {
   }
 }
 
-int drawSquareSimonGame(int row, int col,int num, bool pressed){
-  
-  if (pressed == false) colorRGB = tft.color565(40, 112, 181); else colorRGB = tft.color565(27, 77, 125);
+int drawSquareSimonGame(int num, int pressed){
+  // Encontrar fila y columna del número
+  for (int row = 0; row < 3; row++){
+        for(int col = 0; col < 3; col++){
+          if (matrizSimon[row][col] == num){
+            filaNumero = row;
+            colNumero = col;
+            break; // Salimos del for de columnas
+          }
+        }
+  }
+  if (pressed == 0) colorRGB = tft.color565(40, 112, 181); else if (pressed == 1)  colorRGB = tft.color565(27, 77, 125); else if (pressed == 2) colorRGB = tft.color565(87, 153, 217);
 
   // Establecer posiciones de x e y
-  int x = tft.width()/2 - 80 + col * (50 + 5);  // posición x
-  int y = 40 + row * (50 + 5);  // posición y
-  
+  int x = tft.width()/2 - 80 + colNumero * (50 + 5);  // posición x
+  int y = 40 + filaNumero * (50 + 5);  // posición y
+ 
   // Cuadro
   drawColorBox(x, y, 50, 50, colorRGB);  
-  
+ 
   // Texto
   tft.setTextColor(tft.color565(191, 191, 191));
   tft.setTextSize(3);
   tft.setCursor(x + 18, y + 15);
   tft.print(num++); // Escribe el número de la posición, y luego le suma 1
-  
+ 
   return num;
 }
 
 void drawHorsesGameBase(){
   tft.fillScreen(ILI9341_DARKGREY);
-  
+ 
   // Dibujo de caballos
   drawColorBox(10, 20, 30, 20, ILI9341_RED);
   drawColorBox(10, 60, 30, 20, ILI9341_ORANGE);
   drawColorBox(10, 100, 30, 20, ILI9341_YELLOW);
   drawColorBox(10, 140, 30, 20, ILI9341_GREEN);
-  
+ 
   // Dibujo de la meta
   drawMarkerBar(tft.width() - 30, 15, 20, 160);
 
@@ -394,7 +421,7 @@ void drawHorsesGameBase(){
   tft.fillRect(10 , tft.height() - 40, tft.width() - 20, 30, ILI9341_BLACK);
     // Cuadro verde - posición izquierda
   tft.fillRect(tft.width()/3 , tft.height() - 40, tft.width()/3, 30, ILI9341_GREEN);
-  
+ 
   // Cuadro amarillo - posición centro
   tft.fillRect(tft.width()/2 -10 , tft.height() - 40, 20, 30, ILI9341_YELLOW);
 }
@@ -409,10 +436,11 @@ void drawSimonGameBase() {
   int num = 1;
   for (int row = 0; row < 3; row++) {
     for (int col = 0; col < 3; col++) {
-      drawSquareSimonGame(row, col, num, false);
+      drawSquareSimonGame(num, false);
       num++;
     }
   }
+  showPointsSimon(puntajeSimon);
 }
 
 int pointsCalculator(int basePoints, float multiplier){
@@ -432,7 +460,7 @@ void setup() {
 
   randomSeed(analogRead(A0)); // Semilla aleatoria unica
   /*Serial.println("Bienvenido a nuestro proyecto! Ingrese su nombre de usuario:");
-  
+ 
   while (userName.length() == 0) {
     if (Serial.available() > 0) {
       userName = Serial.readStringUntil('\n'); // Lee hasta que el usuario presione Enter
@@ -441,6 +469,7 @@ void setup() {
   }
   Serial.print("Nombre Ingresado:");
   Serial.println(userName);*/                      //Deje esto como comentario para testear el tft, usalo cuando necesite
+  // drawScaledRGBBitmapFloat(tft, 0, 0, Z, 11, 11, 6);
   lbNombres.add(nombre1); lbNombres.add(nombre2); lbNombres.add(nombre3); lbNombres.add(nombre4); lbNombres.add(nombre5);
   lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1);
 
@@ -459,11 +488,18 @@ void loop() {
     gameState = menu(2);
     tft.fillScreen(ILI9341_BLACK);
   }
-  if (gameState == 10){ // que 10 sea el iniciador del juego, y 1 cuando se está jugando (para no hacer otra variable), aplicar lo mismo con juego 2
-
+  else if (gameState == 10){ // que 10 sea el iniciador del juego, y 1 cuando se está jugando (para no hacer otra variable), aplicar lo mismo con juego 2
+      drawSimonGameBase();
+      gameState = 1;
   }
-  if (gameState == 1){ // Juego N1: Simon Dice
-    puntajeSimon = 0;
+ 
+  else if (gameState == 1){ // Juego N1: Simon Dice
+    for (int i = 0; i < indexGame; i++) {
+      Serial.print("Tecla borrada: ");
+      Serial.println(passwordGame[i]);
+      drawSquareSimonGame(passwordGame[i], 0);
+    }
+   
     if (indexGame < RondasMaximas) {
       passwordGame[indexGame] = random(1, 10);
       Serial.print("Numero agregado: ");
@@ -475,26 +511,17 @@ void loop() {
       // Parte TERMINAL
     Serial.print("Clave: ");
     for (int i = 0; i < indexGame; i++) {
-      
       Serial.print(passwordGame[i]);
       Serial.print(" ");
-      
+     
        // Reiniciar fila y columna antes de buscar
       filaNumero = -1;
       colNumero = -1;
       // Parte TFT
-          // Encontrar fila y columna del número
-      for (int fila = 0; fila < 3; fila++){
-        for(int col = 0; col < 3; col++){
-          if (matrizSimon[fila][col] == passwordGame[i]){ 
-            filaNumero = fila;
-            colNumero = col;
-            break; // Salimos del for de columnas
-          }
-        }
-        if (filaNumero != -1 and colNumero != -1) break; // Salimos del for de filas, -1 era el valor predefinido, -1 = no encontrado
-      }
-      drawSquareSimonGame(filaNumero, colNumero, passwordGame[i], true);
+     
+      drawSquareSimonGame(passwordGame[i], 1);
+      delay(1000);
+      drawSquareSimonGame(passwordGame[i], 0);
     }
 
     Serial.println("\n----------");
@@ -502,43 +529,56 @@ void loop() {
     // JUGADOR INTENTA REPLICAR CLAVE
     indexPlayer = 0;
     while (indexPlayer < indexGame) {
-      char key = keypad.getKey(); 
+      char key = keypad.getKey();
       if (key) {
-        if (key >= '0' && key <= '9') {
+        if (key >= '0' && key <= '9') { // Si toca un numero
 
           passwordPlayer[indexPlayer] = key - '0'; // convierte char '3' → int 3
           Serial.print("Tecla elegida: ");
           Serial.println(passwordPlayer[indexPlayer]);
-          indexPlayer++;
-        } else {
+          drawSquareSimonGame(passwordPlayer[indexPlayer], 2);
+          delay(1000);
+          drawSquareSimonGame(passwordPlayer[indexPlayer], 0);
+         
+        }
+        else { // Si no toca un numero
           Serial.println("Tecla no válida");
           rondaPasada = false;
           break;
         }
-      }
-    }
-
-    // Comparación de patrones para ver si el usuario pasa o no a la sig ronda
-    bool rondaPasada = true;
-    for (int i = 0; i < indexGame; i++) {
-      if (passwordGame[i] != passwordPlayer[i]) {
-        rondaPasada = false;
-        break;
+        if (rondaPasada == true){
+          /* Serial.println(passwordPlayer[indexPlayer]);
+          Serial.println(passwordGame[indexPlayer]); */
+          if (passwordPlayer[indexPlayer] != passwordGame[indexPlayer]) { // Si tocó un número, pero la tecla no es correcta, así se detiene el programa sin esperar a que tenga la misma longitud de la clave a copiar
+            Serial.println("TECLA INCORRECTA");
+            rondaPasada = false;
+            break;
+          }
+        }
+        indexPlayer++;
       }
     }
 
     if (rondaPasada) {
-      puntajeSimon += 1;
+      puntajeSimon++;
       Serial.println("GG, pasaste la ronda!");
+      showPointsSimon(puntajeSimon);
     } else {
-      
+     
       Serial.println("Fallaste! Buena suerte la prox.");
-      while (1);
-    }
+      gameState = 3;
+      gameOverScreen();
+
+      }
 
     delay(1000);
+  }
+  else if (gameState == 20){
+  drawHorsesGameBase();
+  gameState = 2;
   }
   else if (gameState == 2){ // Juego N2: Carrera de caballos con 4 jugadores
 
   }
+ 
 }
