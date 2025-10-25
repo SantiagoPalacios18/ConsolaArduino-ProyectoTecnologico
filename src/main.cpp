@@ -56,7 +56,7 @@ const uint16_t X[12 * 11] PROGMEM = { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x
 const uint16_t Y[12 * 11] PROGMEM = { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8430, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x8430, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x8430, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x8430, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 const uint16_t Z[11 * 11] PROGMEM = { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8430, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8430, 0xffff, 0xffff, 0xffff, 0x8430, 0x0000, 0x0000, 0x0000, 0x8430, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x8430, 0xffff, 0xffff, 0xffff, 0x8430, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 
-// Escalar bitmaps
+// FUNCION para escalar bitmaps, lo dejamos acá por comodidad
 void drawScaledRGBBitmapFloat(Adafruit_ILI9341 &tft, int16_t x, int16_t y, const uint16_t *bitmap, int16_t w, int16_t h, float scale) {
   for (int16_t j = 0; j < int(h * scale); j++) {
     for (int16_t i = 0; i < int(w * scale); i++) {
@@ -71,7 +71,6 @@ void drawScaledRGBBitmapFloat(Adafruit_ILI9341 &tft, int16_t x, int16_t y, const
 // Definimos el número de filas y columnas del keypad
 const byte ROWS = 4;
 const byte COLS = 4;
-
 // Definimos las teclas en una matriz
 char keys[ROWS][COLS] = {
   {'1','2','3','A'},
@@ -90,7 +89,7 @@ int colorRGB;
 int filaNumero = -1;
 int colNumero = -1;
 
-const int RondasMaximas = 20;
+const int RondasMaximas = 64;
 
 // Pines del Arduino conectados al teclado
 byte rowPins[ROWS] = {2, 3, 4, 5};  
@@ -101,8 +100,7 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 int gameState = 0;
 
 char letras[26] = {
-  'A','B','C','D','E','F','G','H','I','J','K','L','M',
-  'N','O','P','Q','R','S','T','U','V','W','X','Y','Z'
+  'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'
 };
 
 const uint16_t *letrasBitmap[26] = {
@@ -124,6 +122,33 @@ int puntaje3 = 20;
 int puntaje4 = 10;
 int puntaje5 = 5;
 LinkedList<int> lbPuntajes;
+
+
+byte passwordGame[RondasMaximas];
+byte passwordPlayer[RondasMaximas];
+bool rondaPasada;
+int puntajeSimon;
+int indexGame;
+int indexPlayer;
+
+//-------------------- FUNCIONES --------------------//
+
+void drawColorBox(int x, int y, int width , int height, uint16_t color) {
+  tft.fillRect(x, y, width, height, color);
+}
+
+void drawMarkerBar(int x, int y, int width, int height) {
+  int blockHeight = 10;
+  bool white = true;
+  for (int i = 0; i < height; i += blockHeight) {
+    if (white) {
+      tft.fillRect(x, y + i, width, blockHeight, ILI9341_WHITE);
+    } else {
+      tft.fillRect(x, y + i, width, blockHeight, ILI9341_BLACK);
+    }
+    white = !white;
+  }
+}
 
 void mostrarLetra(int pos, int letraN){
   const uint16_t *letra = letrasBitmap[letraN];
@@ -186,6 +211,7 @@ String selectName(){
   }
   return name;
 }
+
 void showLeaderboard(int p1, int p2, int p3, int p4, int p5, String n1, String n2, String n3, String n4, String n5){
   tft.setTextSize(4);
   tft.setCursor(40, 10);
@@ -279,27 +305,58 @@ void checkLeaderboard(int puntaje) {
   showLeaderboard(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
 }
 
-byte passwordGame[RondasMaximas];
-byte passwordPlayer[RondasMaximas];
-bool rondaPasada = true;
-int puntajeSimon = 0;
-int indexGame = 0;
-int indexPlayer = 0;
-String userName = "";
-
-//-------------------- FUNCIONES --------------------//
-
 void gameOverScreen(){
+  int opcSelec = 1;
+  int opcShowing = 2;
   tft.fillScreen(ILI9341_RED);
-  tft.setCursor(tft.width()/2 - 50, 100);
+
+  tft.setCursor((tft.width()-216)/2, 60);
   tft.setTextSize(4);
   tft.setTextColor(tft.color565(255, 255, 255));
   tft.println("GAME OVER");
  
-  tft.setCursor(tft.width()/3 - 50, 150);
+  
+  tft.setCursor((tft.width()- 120)/2, 120);
   tft.setTextSize(2);
-  tft.setTextColor(tft.color565(255, 255, 255));
-  tft.println("¿Volver a jugar?");
+  tft.println("Ir al menu");
+
+  tft.setCursor((tft.width()- 168)/2, 150);
+  tft.println("Volver a jugar");
+
+
+
+  while (gameState == -1) {
+
+    char key = keypad.getKey();
+   
+    if (key) {
+      if (key == '4' && opcSelec > 1){
+        opcSelec -= 1;
+      }
+      else if (key == '*' && opcSelec < 2){
+        opcSelec += 1;
+      }
+      else if (key == '7'){
+        if (opcSelec == 1){
+          gameState = 10;
+        }
+        else{
+          gameState = 0;
+        }
+      }
+    }
+
+    if (opcSelec == 1 && opcShowing == 2){
+      opcShowing = 1;
+      drawColorBox((tft.width()- 168)/2 - 20, 150, 10, 10, ILI9341_WHITE);
+      drawColorBox((tft.width()- 120)/2 - 20, 120, 10 , 10, ILI9341_RED);
+    }
+    else if (opcSelec == 2 && opcShowing == 1){
+      opcShowing = 2;
+      drawColorBox((tft.width()- 120)/2 - 20, 120, 10 , 10, ILI9341_WHITE);
+      drawColorBox((tft.width()- 168)/2 - 20, 150, 10, 10, ILI9341_RED);
+    }
+  }
 }
 
 void showPointsSimon(int points){
@@ -311,9 +368,11 @@ void showPointsSimon(int points){
 }
 
 int menu(int cantJuegos) {
+  
   int end = 0;
   int juegoSelec = 1;
   int showGame = 2;
+  tft.fillScreen(ILI9341_BLACK);
   while (end == 0) {
 
     char key = keypad.getKey();
@@ -331,27 +390,42 @@ int menu(int cantJuegos) {
       }
     }
 
-    if (juegoSelec == 1 && showGame == 2) {
+    if (juegoSelec == 1 && (showGame == 2 || showGame == 3)) {
       showGame = 1;
-      tft.fillRect(48, 16, 280, 44, 0x0000);
-      tft.setTextSize(4);
+      tft.fillRect(46, 16, 228, 24, 0x0000);
+      tft.setTextSize(3);
       tft.setTextColor(ILI9341_WHITE);
-      tft.setCursor(48, 16);
+      tft.setCursor((tft.width() - 180) / 2, 16);
       tft.println("Simon dice");
-      tft.drawRGBBitmap(64, 128, logoSimonDice_select, 64, 64);
-      tft.drawRGBBitmap(192, 128, logoSimonDice, 64, 64);
+      tft.drawRGBBitmap(tft.width()/2 - 128, 128, logoSimonDice_select, 64, 64);
+      tft.drawRGBBitmap(tft.width()/2 - 32, 128, logoSimonDice, 64, 64);
+      tft.drawRGBBitmap(tft.width()/2 + 64, 128, logoSimonDice, 64, 64);
       Serial.print(key);
     }
    
-    else if (juegoSelec == 2 && showGame == 1) {
+    else if (juegoSelec == 2 && (showGame == 1 || showGame == 3)) {
       showGame = 2;
-      tft.fillRect(48, 16, 280, 44, 0x0000);
+      tft.fillRect(46, 16, 228, 24, 0x0000);
       tft.setTextSize(2);
       tft.setTextColor(ILI9341_WHITE);
-      tft.setCursor(48, 16);
+      tft.setCursor((tft.width() - 228) / 2, 16);
       tft.println("Carrera de caballos");
-      tft.drawRGBBitmap(64, 128, logoSimonDice, 64, 64);
-      tft.drawRGBBitmap(192, 128, logoSimonDice_select, 64, 64);
+      tft.drawRGBBitmap(tft.width()/2 - 128, 128, logoSimonDice, 64, 64);
+      tft.drawRGBBitmap(tft.width()/2 - 32, 128, logoSimonDice_select, 64, 64);
+      tft.drawRGBBitmap(tft.width()/2 + 64, 128, logoSimonDice, 64, 64);
+      Serial.print(key);
+    }
+
+    else if (juegoSelec == 3 && (showGame == 1 || showGame == 2)) {
+      showGame = 3;
+      tft.fillRect(46, 16, 228, 24, 0x0000);
+      tft.setTextSize(3);
+      tft.setTextColor(ILI9341_WHITE);
+      tft.setCursor((tft.width() - 180) / 2, 16);
+      tft.println("Leaderboard");
+      tft.drawRGBBitmap(tft.width()/2 - 128, 128, logoSimonDice, 64, 64);
+      tft.drawRGBBitmap(tft.width()/2 - 32, 128, logoSimonDice, 64, 64);
+      tft.drawRGBBitmap(tft.width()/2 + 64, 128, logoSimonDice_select, 64, 64);
       Serial.print(key);
     }
   }
@@ -359,22 +433,6 @@ int menu(int cantJuegos) {
   return juegoSelec;
 }
 
-void drawColorBox(int x, int y, int width , int height, uint16_t color) {
-  tft.fillRect(x, y, width, height, color);
-}
-
-void drawMarkerBar(int x, int y, int width, int height) {
-  int blockHeight = 10;
-  bool white = true;
-  for (int i = 0; i < height; i += blockHeight) {
-    if (white) {
-      tft.fillRect(x, y + i, width, blockHeight, ILI9341_WHITE);
-    } else {
-      tft.fillRect(x, y + i, width, blockHeight, ILI9341_BLACK);
-    }
-    white = !white;
-  }
-}
 
 int drawSquareSimonGame(int num, int pressed){
   // Encontrar fila y columna del número
@@ -472,25 +530,29 @@ void setup() {
   // drawScaledRGBBitmapFloat(tft, 0, 0, Z, 11, 11, 6);
   lbNombres.add(nombre1); lbNombres.add(nombre2); lbNombres.add(nombre3); lbNombres.add(nombre4); lbNombres.add(nombre5);
   lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1);
-
-  while (0 == 0){
+  /* while (0 == 0){
     checkLeaderboard(1000);
     while (0 == 0){
       int x = 1;
       Serial.print(x);
     }
-  }
+  } */
 }
 
 void loop() {
 
   if (gameState == 0){
-    gameState = menu(2);
-    tft.fillScreen(ILI9341_BLACK);
+    gameState = menu(3);
   }
   else if (gameState == 10){ // que 10 sea el iniciador del juego, y 1 cuando se está jugando (para no hacer otra variable), aplicar lo mismo con juego 2
-      drawSimonGameBase();
-      gameState = 1;
+    memset(passwordGame, 0, sizeof(passwordGame));
+    memset(passwordGame, 0, sizeof(passwordGame));
+    rondaPasada = true;
+    puntajeSimon = 0;
+    indexGame = 0;
+    indexPlayer = 0;
+    drawSimonGameBase();
+    gameState = 1;
   }
  
   else if (gameState == 1){ // Juego N1: Simon Dice
@@ -566,7 +628,7 @@ void loop() {
     } else {
      
       Serial.println("Fallaste! Buena suerte la prox.");
-      gameState = 3;
+      gameState = -1;
       gameOverScreen();
 
       }
