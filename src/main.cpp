@@ -262,7 +262,7 @@ void showLeaderboard(int p1, int p2, int p3, int p4, int p5, String n1, String n
   tft.setCursor(40, 10);
     tft.println("LEADERBOARD");
   tft.setTextSize(4);
-  for (int i = 0; i < 10; i++){ 
+  for (int i = 0; i <= 10; i++){ 
     int p = 0;
     if (i % 2 != 0){
       p = 40; //Columna puntajes
@@ -293,7 +293,7 @@ void showLeaderboard(int p1, int p2, int p3, int p4, int p5, String n1, String n
   }
 }
 
-int checkLeaderboard(int puntaje, int p1, int p2, int p3, int p4, int p5, String n1, String n2, String n3, String n4, String n5) {
+user checkLeaderboard(int puntaje, int p1, int p2, int p3, int p4, int p5, String n1, String n2, String n3, String n4, String n5) {
   if (puntaje > p1){
     p5 = p4;
     p4 = p3;
@@ -340,9 +340,31 @@ int checkLeaderboard(int puntaje, int p1, int p2, int p3, int p4, int p5, String
     n5 = nombre;
   }
 
+  user userV1;
+  n1.toCharArray(userV1.nombre, sizeof(userV1.nombre));
+  userV1.puntaje = p1;
+
+  user userV2;
+  n2.toCharArray(userV2.nombre, sizeof(userV2.nombre));
+  userV2.puntaje = p2;
+
+  user userV3;
+  n3.toCharArray(userV3.nombre, sizeof(userV3.nombre));
+  userV3.puntaje = p3;
+
+  user userV4;
+  n4.toCharArray(userV4.nombre, sizeof(userV4.nombre));
+  userV4.puntaje = p4;
+
+  user userV5;
+  n5.toCharArray(userV5.nombre, sizeof(userV5.nombre));
+  userV5.puntaje = p5;
+
+
   tft.fillScreen(ILI9341_BLACK);
   showLeaderboard(p1, p2, p3, p4, p5, n1, n2, n3, n4, n5);
-  
+
+  return (userV1, userV2, userV3, userV4, userV5);
 }
 
 void gameOverScreen(){
@@ -651,6 +673,7 @@ void setup() {
   }
 
   while (0 == 0){
+    (Auser1, Auser2, Auser3, Auser4, Auser5) = checkLeaderboard(900, Apuntaje1, Apuntaje2, Apuntaje3, Apuntaje4, Apuntaje5, Anombre1, Anombre2, Anombre3, Anombre4, Anombre5);
   }  
 }
 
