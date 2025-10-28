@@ -1,10 +1,12 @@
-//-------------------- VARIABLES --------------------//
 #include <Adafruit_ILI9341.h>
 #include <SPI.h>
 #include <Keypad.h>
 #include <Adafruit_GFX.h>
-#include <LinkedList.h>
+#include <EEPROM.h>
 
+//-------------------- VARIABLES --------------------//
+
+//Valores de los pines de la placa que se conectan a los de la pantalla TFT
 const int CSv = 45;
 const int RSTv = 47;
 const int DCv = 49;
@@ -12,10 +14,13 @@ const int MOSIv = 51;
 const int SCKv = 52;
 const int MISOv = 50;
 
+int addr = 0; //esta variable permite evitar errores al agregar valores a la memoria EEPROM
+
 #define TFT_CS CSv
 #define TFT_DC DCv
 #define TFT_RST RSTv
 
+//Configura la libreroa con la pantalla tft
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
 //Bitmaps - Organizados en Spritesheets para animaciones
@@ -56,22 +61,10 @@ const uint16_t X[12 * 11] PROGMEM = { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x
 const uint16_t Y[12 * 11] PROGMEM = { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8430, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x8430, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x8430, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x8430, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 const uint16_t Z[11 * 11] PROGMEM = { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8430, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8430, 0xffff, 0xffff, 0xffff, 0x8430, 0x0000, 0x0000, 0x0000, 0x8430, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x8430, 0xffff, 0xffff, 0xffff, 0x8430, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 
-// FUNCION para escalar bitmaps, lo dejamos acá por comodidad
-void drawScaledRGBBitmapFloat(Adafruit_ILI9341 &tft, int16_t x, int16_t y, const uint16_t *bitmap, int16_t w, int16_t h, float scale) {
-  for (int16_t j = 0; j < int(h * scale); j++) {
-    for (int16_t i = 0; i < int(w * scale); i++) {
-      int srcX = int(i / scale);
-      int srcY = int(j / scale);
-      uint16_t color = pgm_read_word(&bitmap[srcY * w + srcX]);
-      tft.drawPixel(x + i, y + j, color);
-    }
-  }
-}
-
-// Definimos el número de filas y columnas del keypad
+//Número de filas y columnas del keypad
 const byte ROWS = 4;
 const byte COLS = 4;
-// Definimos las teclas en una matriz
+//Teclas del keypad en una matriz
 char keys[ROWS][COLS] = {
   {'1','2','3','A'},
   {'4','5','6','B'},
@@ -95,34 +88,41 @@ const int RondasMaximas = 64;
 byte rowPins[ROWS] = {2, 3, 4, 5};  
 byte colPins[COLS] = {6, 7, 8 ,9};  
 
+// Configura la libreria con el Keypad
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
+// Esta variable define la instancia en la que se encuentra, su valor indica si se encuentra en el menu, en el Simon dice, etc
 int gameState = 0;
 
+//Ordena los valores de letra posibles en la seleccion de nombre (Leaderboard)
 char letras[26] = {
   'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'
 };
 
+//Contiene los nombres de los bitmaps de cada letra del array arriba ^, tienen que estar en el mismo orden para que el programa pueda saber que letra mostrar
 const uint16_t *letrasBitmap[26] = {
   A, B, C, D, E, F, G, H, I, J, K, L, M,
   N, O, P, Q, R, S, T, U, V, W, X, Y, Z
 };
 
-String nombre1 = "XXX";
-String nombre2 = "XXX";
-String nombre3 = "XXX";
-String nombre4 = "XXX";
-String nombre5 = "XXX";
+//Estructura donde se guardan los datos del leaderboard
+struct user{
+  char nombre[4];
+  int puntaje;
+};
 
-LinkedList<String> lbNombres;
+int flagDir = 0; const byte flag = 0xAB;
+String Anombre1 = "XXX"; int Apuntaje1 = 0; user Auser1; const int Auser1dir = 1;
+String Anombre2 = "XXX"; int Apuntaje2 = 0; user Auser2; const int Auser2dir = 7;
+String Anombre3 = "XXX"; int Apuntaje3 = 0; user Auser3; const int Auser3dir = 13;
+String Anombre4 = "XXX"; int Apuntaje4 = 0; user Auser4; const int Auser4dir = 19;
+String Anombre5 = "XXX"; int Apuntaje5 = 0; user Auser5; const int Auser5dir = 25;
 
-int puntaje1 = 60;
-int puntaje2 = 40;
-int puntaje3 = 20;
-int puntaje4 = 10;
-int puntaje5 = 5;
-LinkedList<int> lbPuntajes;
-
+String Bnombre1 = "XXX"; int Bpuntaje1 = 0; user Buser1; const int Buser1dir = 31;
+String Bnombre2 = "XXX"; int Bpuntaje2 = 0; user Buser2; const int Buser2dir = 37;
+String Bnombre3 = "XXX"; int Bpuntaje3 = 0; user Buser3; const int Buser3dir = 43;
+String Bnombre4 = "XXX"; int Bpuntaje4 = 0; user Buser4; const int Buser4dir = 49;
+String Bnombre5 = "XXX"; int Bpuntaje5 = 0; user Buser5; const int Buser5dir = 55;
 
 byte passwordGame[RondasMaximas];
 byte passwordPlayer[RondasMaximas];
@@ -132,6 +132,44 @@ int indexGame;
 int indexPlayer;
 
 //-------------------- FUNCIONES --------------------//
+
+void guardarDatoLB(int dir, String nombre, int puntaje, user userv){
+  nombre.toCharArray(userv.nombre, sizeof(userv.nombre));
+  userv.puntaje = puntaje;
+  EEPROM.put(dir, userv);
+}
+
+user loadLB(user user1, user user2, user user3, user user4, user user5, int user1dir, int user2dir, int user3dir, int user4dir, int user5dir){
+  EEPROM.get(user1dir, user1); 
+  EEPROM.get(user2dir, user2);
+  EEPROM.get(user3dir, user3);
+  EEPROM.get(user4dir, user4);
+  EEPROM.get(user5dir, user5);
+  String nombre1 = user1.nombre; String nombre2 = user2.nombre; String nombre3 = user3.nombre; String nombre4 = user4.nombre; String nombre5 = user5.nombre;
+  return(user1, user2, user3, user4, user5);
+}
+
+int loadP(user user1, user user2, user user3, user user4, user user5){
+  int puntaje1 = user1.puntaje; int puntaje2 = user2.puntaje; int puntaje3 = user3.puntaje; int puntaje4 = user4.puntaje; int puntaje5 = user5.puntaje;
+  return(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5);
+}
+
+String loadN(user user1, user user2, user user3, user user4, user user5){
+  String nombre1 = user1.nombre; String nombre2 = user2.nombre; String nombre3 = user3.nombre; String nombre4 = user4.nombre; String nombre5 = user5.nombre;
+  return(nombre1, nombre2, nombre3, nombre4, nombre5);
+}
+
+// FUNCION para escalar bitmaps, lo dejamos acá por comodidad
+void drawScaledRGBBitmapFloat(Adafruit_ILI9341 &tft, int16_t x, int16_t y, const uint16_t *bitmap, int16_t w, int16_t h, float scale) {
+  for (int16_t j = 0; j < int(h * scale); j++) {
+    for (int16_t i = 0; i < int(w * scale); i++) {
+      int srcX = int(i / scale);
+      int srcY = int(j / scale);
+      uint16_t color = pgm_read_word(&bitmap[srcY * w + srcX]);
+      tft.drawPixel(x + i, y + j, color);
+    }
+  }
+}
 
 void drawColorBox(int x, int y, int width , int height, uint16_t color) {
   tft.fillRect(x, y, width, height, color);
@@ -153,13 +191,6 @@ void drawMarkerBar(int x, int y, int width, int height) {
 void mostrarLetra(int pos, int letraN){
   const uint16_t *letra = letrasBitmap[letraN];
   drawScaledRGBBitmapFloat(tft, pos, 110, letra, 11, 11, 6);
-}
-
-void updLB(int p1, int p2, int p3, int p4, int p5, String n1, String n2, String n3, String n4, String n5){
-  lbPuntajes.clear();
-  lbPuntajes.add(p1); lbPuntajes.add(p2); lbPuntajes.add(p3); lbPuntajes.add(p4); lbPuntajes.add(p5);
-  lbNombres.clear();
-  lbNombres.add(n1); lbNombres.add(n2); lbNombres.add(n3); lbNombres.add(n4); lbNombres.add(n5);
 }
 
 String selectName(){
@@ -248,61 +279,56 @@ void showLeaderboard(int p1, int p2, int p3, int p4, int p5, String n1, String n
   }
 }
 
-void checkLeaderboard(int puntaje) {
-  if (puntaje > lbPuntajes.get(1)){
-    puntaje5 = puntaje4;
-    Serial.print(puntaje5);
-    puntaje4 = puntaje3;
-    puntaje3 = puntaje2;
-    puntaje2 = puntaje1;
-    puntaje1 = puntaje;
+int checkLeaderboard(int puntaje, int p1, int p2, int p3, int p4, int p5, String n1, String n2, String n3, String n4, String n5) {
+  if (puntaje > p1){
+    p5 = p4;
+    p4 = p3;
+    p3 = p2;
+    p2 = p1;
+    p1 = puntaje;
     String nombre = selectName();
-    nombre5 = nombre4;
-    nombre4 = nombre3;
-    nombre3 = nombre2;
-    nombre2 = nombre1;
-    nombre1 = nombre;
-    updLB(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
+    n5 = n4;
+    n4 = n3;
+    n3 = n2;
+    n2 = n1;
+    n1 = nombre;
   }
-  else if (puntaje > lbPuntajes.get(2)){
-    puntaje5 = puntaje4;
-    puntaje4 = puntaje3;
-    puntaje3 = puntaje2;
-    puntaje2 = puntaje;
+  else if (puntaje > p2){
+    p5 = p4;
+    p4 = p3;
+    p3 = p2;
+    p2 = puntaje;
     String nombre = selectName();
-    nombre5 = nombre4;
-    nombre4 = nombre3;
-    nombre3 = nombre2;
-    nombre2 = nombre;
-    updLB(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
+    n5 = n4;
+    n4 = n3;
+    n3 = n2;
+    n2 = nombre;
   }
-  else if (puntaje > lbPuntajes.get(3)){
-    puntaje5 = puntaje4;
-    puntaje4 = puntaje3;
-    puntaje3 = puntaje;
+  else if (puntaje > p3){
+    p5 = p4;
+    p4 = p3;
+    p3 = puntaje;
     String nombre = selectName();
-    nombre5 = nombre4;
-    nombre4 = nombre3;
-    nombre3 = nombre;
-    updLB(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
+    n5 = n4;
+    n4 = n3;
+    n3 = nombre;
   }
-  else if (puntaje > lbPuntajes.get(4)){
-    puntaje5 = puntaje4;
-    puntaje4 = puntaje;
+  else if (puntaje > p4){
+    p5 = p4;
+    p4 = puntaje;
     String nombre = selectName();
-    nombre5 = nombre4;
-    nombre4 = nombre;
-    updLB(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
+    n5 = n4;
+    n4 = nombre;
   }
-  else if (puntaje > lbPuntajes.get(5)){
-    puntaje5 = puntaje;
+  else if (puntaje > p5){
+    p5 = puntaje;
     String nombre = selectName();
-    nombre5 = nombre;
-    updLB(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
+    n5 = nombre;
   }
 
   tft.fillScreen(ILI9341_BLACK);
-  showLeaderboard(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5, nombre1, nombre2, nombre3, nombre4, nombre5);
+  showLeaderboard(p1, p2, p3, p4, p5, n1, n2, n3, n4, n5);
+  
 }
 
 void gameOverScreen(){
@@ -507,7 +533,10 @@ int pointsCalculator(int basePoints, float multiplier){
 }
 
 
+
 //-------------------- PROGRAMA PRINCIPAL --------------------//
+
+
 
 void setup() {
 
@@ -517,26 +546,38 @@ void setup() {
   tft.setRotation(3);
 
   randomSeed(analogRead(A0)); // Semilla aleatoria unica
-  /*Serial.println("Bienvenido a nuestro proyecto! Ingrese su nombre de usuario:");
- 
-  while (userName.length() == 0) {
-    if (Serial.available() > 0) {
-      userName = Serial.readStringUntil('\n'); // Lee hasta que el usuario presione Enter
-      userName.trim(); // Quita espacios al inicio o final
-    }
-  }
-  Serial.print("Nombre Ingresado:");
-  Serial.println(userName);*/                      //Deje esto como comentario para testear el tft, usalo cuando necesite
+
   // drawScaledRGBBitmapFloat(tft, 0, 0, Z, 11, 11, 6);
-  lbNombres.add(nombre1); lbNombres.add(nombre2); lbNombres.add(nombre3); lbNombres.add(nombre4); lbNombres.add(nombre5);
-  lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1); lbPuntajes.add(puntaje1);
-  /* while (0 == 0){
-    checkLeaderboard(1000);
-    while (0 == 0){
-      int x = 1;
-      Serial.print(x);
-    }
-  } */
+
+  Serial.print(EEPROM.read(flagDir));
+
+  if (EEPROM.read(flagDir) != flag){
+    guardarDatoLB(Auser1dir, Anombre1, Apuntaje1, Auser1);
+    guardarDatoLB(Auser2dir, Anombre2, Apuntaje2, Auser2);
+    guardarDatoLB(Auser3dir, Anombre3, Apuntaje3, Auser3);
+    guardarDatoLB(Auser4dir, Anombre4, Apuntaje4, Auser4);
+    guardarDatoLB(Auser5dir, Anombre5, Apuntaje5, Auser5);
+
+    guardarDatoLB(Buser1dir, Bnombre1, Bpuntaje1, Buser1);
+    guardarDatoLB(Buser2dir, Bnombre2, Bpuntaje2, Buser2);
+    guardarDatoLB(Buser3dir, Bnombre3, Bpuntaje3, Buser3);
+    guardarDatoLB(Buser4dir, Bnombre4, Bpuntaje4, Buser4);
+    guardarDatoLB(Buser5dir, Bnombre5, Bpuntaje5, Buser5);
+    EEPROM.write(flagDir, flag);
+  }
+  else{
+    (Auser1, Auser2, Auser3, Auser4, Auser5) = loadLB(Auser1, Auser2, Auser3, Auser4, Auser5, Auser1dir, Auser2dir, Auser3dir, Auser4dir, Auser5dir);
+    (Buser1, Buser2, Buser3, Buser4, Buser5) = loadLB(Buser1, Buser2, Buser3, Buser4, Buser5, Buser1dir, Buser2dir, Buser3dir, Buser4dir, Buser5dir);
+    
+    (Apuntaje1, Apuntaje2, Apuntaje3, Apuntaje4, Apuntaje5) = loadP(Auser1, Auser2, Auser3, Auser4, Auser5);
+    (Bpuntaje1, Bpuntaje2, Bpuntaje3, Bpuntaje4, Bpuntaje5) = loadP(Buser1, Buser2, Buser3, Buser4, Buser5);
+
+    (Anombre1, Anombre2, Anombre3, Anombre4, Anombre5) = loadN(Auser1, Auser2, Auser3, Auser4, Auser5);
+    (Bnombre1, Bnombre2, Bnombre3, Bnombre4, Bnombre5) = loadN(Buser1, Buser2, Buser3, Buser4, Buser5);
+  }
+
+  while (0 == 0){
+  }  
 }
 
 void loop() {
