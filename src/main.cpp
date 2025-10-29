@@ -608,7 +608,7 @@ void attackHorseSistem(){
                         hp.pos[j] += 2;
                         hp.points[j] += 5;
                     }
-                  if (hp.pos[j] > 5){
+                  if (hp.pos[j] > 50){
                     horseRaceWinner = hp.keys[j];
                     Serial.print("GANADORRRRRR: ");
                     Serial.println(hp.keys[j]);
@@ -911,7 +911,7 @@ void loop() {
     }
     // JUEGO FINALIZADO, HUBO GANADOR
     
-    for (int i; i < 4; i++){ // Buscar el color del ganador (solo para ponerlo en el print akjlsdkjl)
+    for (int i; i < 4; i++){
       if (hp.keys[i] == horseRaceWinner){
         winnerColor = hp.colors[i];
       }
@@ -928,9 +928,7 @@ void loop() {
     tft.setCursor(60, 130);
     tft.setTextSize(4);
     tft.print("Jugador");
-    tft.setCursor(240, 130);
-    tft.setTextColor(winnerColor);
-    tft.print(horseRaceWinner);
+    tft.fillRect(240,130, 30,30, winnerColor);
     delay(5000);
     gameState = -1;
     endScreen(2);
