@@ -4,7 +4,7 @@
 #include <Adafruit_GFX.h>
 #include <EEPROM.h>
 
-//-------------------- VARIABLES --------------------//
+//-------------------- VARIABLES & CONSTANTES --------------------//
 
 //Valores de los pines de la placa que se conectan a los de la pantalla TFT
 const int CSv = 45;
@@ -776,70 +776,69 @@ void loop() {
       Serial.println("Fallaste! Buena suerte la prox.");
       gameState = -1;
       gameOverScreen();
-
+      checkLeaderboard(puntajeSimon, Auser1, Auser2, Auser3, Auser4, Auser5);
       }
 
     delay(1000);
   }
   else if (gameState == 20){
-  drawHorsesGameBase();
-  xPos = 0;
-
-  // Hacer parte de ingresado de nombres @sapato
-  // 3
-  tft.fillRect(tft.width()/2 - 50, tft.height()/2 - 50, 100, 100, ILI9341_WHITE);
-  tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
-  tft.setTextColor(ILI9341_RED);
-  tft.setTextSize(6);
-  tft.setCursor(tft.width()/2 - 18, tft.height()/2 - 20);
-  tft.print("3");
-  delay(1000);
-  // 2
-  tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
-  tft.setTextColor(ILI9341_ORANGE);
-  tft.setCursor(tft.width()/2 - 18, tft.height()/2 - 20);
-  tft.print("2");
-  delay(1000);
-  // 1
-  tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
-  tft.setTextColor(ILI9341_YELLOW);
-  tft.setCursor(tft.width()/2 - 18, tft.height()/2 - 20);
-  tft.print("1");
-  delay(1000);
-  // GO
-  tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
-  tft.setTextColor(ILI9341_GREEN);
-  tft.setTextSize(4);
-  tft.setCursor(tft.width()/2 - 25, tft.height()/2 - 15);
-  tft.print("GO");
-  delay(800);
-  tft.fillRect(tft.width()/2 - 50, tft.height()/2 - 50, 100, 100, ILI9341_DARKGREY);
-  barAttack = true;
-  gameState = 2;
-  
-  }
-  else if (gameState == 2){ // Juego N2: Carrera de caballos con 4 jugadores
-
+    drawHorsesGameBase();
     xPos = 0;
-    if (barAttack == true){
-      // Crear Barra de ataque
-      tft.fillRect(10 , tft.height() - 47.5, tft.width() - 20, 45, ILI9341_DARKGREY);
-      tft.fillRect(10 , tft.height() - 40, tft.width() - 20, 30, ILI9341_BLACK);
-      tft.fillRect(tft.width()/3 , tft.height() - 40, tft.width()/3, 30, ILI9341_GREEN);
-      tft.fillRect(tft.width()/2 -10 , tft.height() - 40, 20, 30, ILI9341_YELLOW);
 
-      delay(500);
-      attackHorseSistem();
-      for (int i = 0; i < numPlayers; i++) {
-        Serial.print("Puntaje Player ");
-        Serial.print(i + 1);
-        Serial.print(": ");
-        Serial.print(horsesPoints[0][i]);
-        Serial.print(", puntaje Anterior");
-        Serial.print(": ");
-        Serial.println(horsesPoints[1][i]);
-      }
+    // 3
+    tft.fillRect(tft.width()/2 - 50, tft.height()/2 - 50, 100, 100, ILI9341_WHITE);
+    tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
+    tft.setTextColor(ILI9341_RED);
+    tft.setTextSize(6);
+    tft.setCursor(tft.width()/2 - 18, tft.height()/2 - 20);
+    tft.print("3");
+    delay(1000);
+    // 2
+    tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
+    tft.setTextColor(ILI9341_ORANGE);
+    tft.setCursor(tft.width()/2 - 18, tft.height()/2 - 20);
+    tft.print("2");
+    delay(1000);
+    // 1
+    tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
+    tft.setTextColor(ILI9341_YELLOW);
+    tft.setCursor(tft.width()/2 - 18, tft.height()/2 - 20);
+    tft.print("1");
+    delay(1000);
+    // GO
+    tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
+    tft.setTextColor(ILI9341_GREEN);
+    tft.setTextSize(4);
+    tft.setCursor(tft.width()/2 - 25, tft.height()/2 - 15);
+    tft.print("GO");
+    delay(800);
+    tft.fillRect(tft.width()/2 - 50, tft.height()/2 - 50, 100, 100, ILI9341_DARKGREY);
+    barAttack = true;
+    gameState = 2;
+    
     }
+    else if (gameState == 2){ // Juego N2: Carrera de caballos con 4 jugadores
+
+      xPos = 0;
+      if (barAttack == true){
+        // Crear Barra de ataque
+        tft.fillRect(10 , tft.height() - 47.5, tft.width() - 20, 45, ILI9341_DARKGREY);
+        tft.fillRect(10 , tft.height() - 40, tft.width() - 20, 30, ILI9341_BLACK);
+        tft.fillRect(tft.width()/3 , tft.height() - 40, tft.width()/3, 30, ILI9341_GREEN);
+        tft.fillRect(tft.width()/2 -10 , tft.height() - 40, 20, 30, ILI9341_YELLOW);
+
+        delay(500);
+        attackHorseSistem();
+        for (int i = 0; i < numPlayers; i++) {
+          Serial.print("Puntaje Player ");
+          Serial.print(i + 1);
+          Serial.print(": ");
+          Serial.print(horsesPoints[0][i]);
+          Serial.print(", puntaje Anterior");
+          Serial.print(": ");
+          Serial.println(horsesPoints[1][i]);
+        }
+      }
     drawHorsesRelativePos(horsesPoints);
   }
  
