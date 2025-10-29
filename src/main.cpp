@@ -133,18 +133,8 @@ int indexPlayer;
 
 //-----JUEGO CARRERA DE CABALLOS-----//
 int xPos;
-bool barAttack = true;
+uint16_t winnerColor;
 
-byte numPlayers = 4;
-char horseGamePlayerState[2][4] = {
-  {'A', '3', '2', '1'},
-  {0, 0, 0, 0}
-};
-
-int horsesPoints[2][4] = {
-  {0, 0, 0, 0},
-  {0, 0, 0, 0}
-};
 //-------------------- FUNCIONES --------------------//
 
 void guardarDatoLB(int dir, String nombre, int puntaje, user userv){
@@ -183,10 +173,6 @@ void drawScaledRGBBitmapFloat(Adafruit_ILI9341 &tft, int16_t x, int16_t y, const
       tft.drawPixel(x + i, y + j, color);
     }
   }
-}
-
-void drawColorBox(int x, int y, int width , int height, uint16_t color) {
-  tft.fillRect(x, y, width, height, color);
 }
 
 void drawMarkerBar(int x, int y, int width, int height) {
@@ -367,17 +353,29 @@ user checkLeaderboard(int puntaje, int p1, int p2, int p3, int p4, int p5, Strin
   return (userV1, userV2, userV3, userV4, userV5);
 }
 
-void gameOverScreen(){
+void endScreen(int game){
   int opcSelec = 1;
   int opcShowing = 2;
-  tft.fillScreen(ILI9341_RED);
-
-  tft.setCursor((tft.width()-216)/2, 60);
-  tft.setTextSize(4);
-  tft.setTextColor(tft.color565(255, 255, 255));
-  tft.println("GAME OVER");
- 
+  uint16_t screenColor;
   
+  if (game == 1){
+    screenColor = ILI9341_RED;
+    tft.fillScreen(screenColor);
+    tft.setCursor((tft.width()-216)/2, 60);
+    tft.setTextSize(4);
+    tft.setTextColor(tft.color565(255, 255, 255));
+    tft.println("GAME OVER");
+  }
+  else{
+    screenColor = ILI9341_BLACK;
+    tft.fillScreen(screenColor);
+    tft.setTextSize(3);
+    tft.setTextColor(ILI9341_WHITE);
+    tft.setCursor((tft.width()- 180)/2, 30);
+    tft.println("Carrera de");
+    tft.setCursor((tft.width()-144)/2, 60);
+    tft.print("caballos");
+  }
   tft.setCursor((tft.width()- 120)/2, 120);
   tft.setTextSize(2);
   tft.println("Ir al menu");
@@ -385,6 +383,8 @@ void gameOverScreen(){
   tft.setCursor((tft.width()- 168)/2, 150);
   tft.println("Volver a jugar");
 
+  tft.setCursor((tft.width()- 132)/2, 180);
+  tft.println("Leaderboard");
 
 
   while (gameState == -1) {
@@ -395,12 +395,12 @@ void gameOverScreen(){
       if (key == '4' && opcSelec > 1){
         opcSelec -= 1;
       }
-      else if (key == '*' && opcSelec < 2){
+      else if (key == '*' && opcSelec < 3){
         opcSelec += 1;
       }
       else if (key == '7'){
         if (opcSelec == 1){
-          gameState = 10;
+          gameState = game * 10;
         }
         else{
           gameState = 0;
@@ -411,12 +411,17 @@ void gameOverScreen(){
     if (opcSelec == 1 && opcShowing == 2){
       opcShowing = 1;
       tft.fillRect((tft.width()- 168)/2 - 20, 150, 10, 10, ILI9341_WHITE);
-      tft.fillRect((tft.width()- 120)/2 - 20, 120, 10 , 10, ILI9341_RED);
+      tft.fillRect((tft.width()- 120)/2 - 20, 120, 10 , 10, screenColor);
     }
-    else if (opcSelec == 2 && opcShowing == 1){
+    else if (opcSelec == 2 && (opcShowing == 1 || opcShowing == 3)){
       opcShowing = 2;
       tft.fillRect((tft.width()- 120)/2 - 20, 120, 10 , 10, ILI9341_WHITE);
-      tft.fillRect((tft.width()- 168)/2 - 20, 150, 10, 10, ILI9341_RED);
+      tft.fillRect((tft.width()- 168)/2 - 20, 150, 10, 10, screenColor);
+    }
+    else if (opcSelec == 3 && opcShowing == 2){
+      opcShowing = 2;
+      tft.fillRect((tft.width()- 120)/2 - 20, 180, 10 , 10, screenColor);
+      tft.fillRect((tft.width()- 168)/2 - 20, 150, 10, 10, ILI9341_WHITE);
     }
   }
 }
@@ -525,26 +530,39 @@ int drawSquareSimonGame(int num, int pressed){
   return num;
 }
 
-void drawHorsesRelativePos(int arr[2][4]){
+struct horsesPlayers{
+  char keys[4];
+  uint16_t colors[4];
+  int pos[4];
+  int posBefore[4];
+  int points[4];
+  bool alreadyPressed[4];
+  bool ready[4];
+};
+horsesPlayers hp;
+char horseRaceWinner = '0';
+bool allHorsesReady = false;
+
+void drawHorsesRelativePos(int points[4], int pointsBefore[4]){
 
   int multiplier = 5;
   // Borrado eficiente de caballos anteriores en posiciones anteriores
   for (int i = 0; i < 4; i++){ 
-    if (arr[0][i] != arr[1][1]){  // Si la posicion actual es desigual a la posicion anterior (O sea que se movió)
-      tft.fillRect(10 + arr[1][i] * multiplier, 20 + i * 40, 30, 20, ILI9341_DARKGREY); // Limpiar posición anterior
+    if (points[i] != pointsBefore[1]){  // Si la posicion actual es desigual a la posicion anterior (O sea que se movió)
+      tft.fillRect(10 + pointsBefore[i] * multiplier, 20 + i * 40, 30, 20, ILI9341_DARKGREY); // Limpiar posición anterior
     }
   }
 
 
-  tft.fillRect(10 + arr[0][0] * multiplier, 20, 30, 20, ILI9341_RED);
-  tft.fillRect(10 + arr[0][1] * multiplier, 60, 30, 20, ILI9341_YELLOW);
-  tft.fillRect(10 + arr[0][2] * multiplier, 100, 30, 20, ILI9341_GREEN);
-  tft.fillRect(10 + arr[0][3] * multiplier, 140, 30, 20, ILI9341_BLUE);
+  tft.fillRect(10 + points[0] * multiplier, 20, 30, 20, hp.colors[0]);
+  tft.fillRect(10 + points[1] * multiplier, 60, 30, 20, hp.colors[1]);
+  tft.fillRect(10 + points[2] * multiplier, 100, 30, 20, hp.colors[2]);
+  tft.fillRect(10 + points[3] * multiplier, 140, 30, 20, hp.colors[3]);
 }
 
 void drawHorsesGameBase(){
   tft.fillScreen(ILI9341_DARKGREY);
-  drawHorsesRelativePos(horsesPoints);
+  drawHorsesRelativePos(hp.pos, hp.posBefore);
  
   // Dibujo de caballos
   
@@ -555,11 +573,10 @@ void drawHorsesGameBase(){
 
 }
 
-
-uint16_t playersBarColors[4] ={ILI9341_RED, ILI9341_YELLOW, ILI9341_GREEN, ILI9341_BLUE};
-
 void attackHorseSistem(){
-
+  for (int i = 0; i < 4; i++){
+    hp.alreadyPressed[i] = false;
+  }
   while (xPos < 400){
     tft.fillRect(10 + xPos, tft.height() - 5, 10, 3, ILI9341_WHITE);
     tft.fillRect(10 + xPos, tft.height() - 47.5, 10, 3, ILI9341_WHITE);
@@ -574,29 +591,33 @@ void attackHorseSistem(){
           byte estado = keypad.key[i].kstate;
 
           // Buscar qué jugador corresponde
-          for (int j = 0; j < numPlayers; j++) {
-            if (tecla == horseGamePlayerState[0][j]) {
-              if (estado == PRESSED) {
-                horseGamePlayerState[1][j] = 1;
-                tft.fillRect(10 + xPos, tft.height() - 47.5, 10, 45, playersBarColors[j]);
-                
-                horsesPoints[1][j] = horsesPoints[0][j];  // guardás puntaje anterior
-                if (xPos >= 8 * 12 && xPos <= 16 * 12){
-                    horsesPoints[0][j]++;               // sumás puntos
-                    if (xPos >= 11 * 12 && xPos <= 13 * 12){
-                        horsesPoints[0][j] += 2;
-                    }
-}
+          for (int j = 0; j < 4; j++) {
+            if (tecla == hp.keys[j]) {
+              if (estado == PRESSED && hp.alreadyPressed[j] == false) { // Se encuentra la tecla presionada
 
+                hp.alreadyPressed[j] = true;
+                tft.fillRect(10 + xPos, tft.height() - 47.5, 10, 45, hp.colors[j]);
+                
+                hp.posBefore[j] = hp.pos[j]; // guarda puntaje anterior
+                if (xPos >= 8 * 12 && xPos <= 16 * 12){
+                    hp.pos[j]++;
+                    hp.points[j]++;
+                    if (xPos >= 11 * 12 && xPos <= 13 * 12){
+                        hp.pos[j] += 2;
+                        hp.points[j] += 5;
+                    }
+                  if (hp.pos[j] > 5){
+                    horseRaceWinner = hp.keys[j];
+                    Serial.print("GANADORRRRRR: ");
+                    Serial.println(hp.keys[j]);
+                  }
+                }
                 /*
                 Serial.print("Jugador ");
                 Serial.print(j + 1);
                 Serial.println(" PRESIONÓ");
                 */
               } 
-              else if (estado == RELEASED) {
-                horseGamePlayerState[1][j] = 0;
-              }
             }
           }
         }
@@ -642,7 +663,7 @@ void setup() {
   tft.setRotation(3);
 
   randomSeed(analogRead(A0)); // Semilla aleatoria unica
-
+  
   // drawScaledRGBBitmapFloat(tft, 0, 0, Z, 11, 11, 6);
 
   Serial.print(EEPROM.read(flagDir));
@@ -671,10 +692,17 @@ void setup() {
     (Anombre1, Anombre2, Anombre3, Anombre4, Anombre5) = loadN(Auser1, Auser2, Auser3, Auser4, Auser5);
     (Bnombre1, Bnombre2, Bnombre3, Bnombre4, Bnombre5) = loadN(Buser1, Buser2, Buser3, Buser4, Buser5);
   }
-
-  while (0 == 0){
+  hp.keys[0] = 'A';
+  hp.keys[1] = '3';
+  hp.keys[2] = '2';
+  hp.keys[3] = '1';
+  hp.colors[0] = ILI9341_RED;
+  hp.colors[1] = ILI9341_YELLOW;
+  hp.colors[2] = ILI9341_GREEN;
+  hp.colors[3] = ILI9341_BLUE;
+  /*while (0 == 0){
     (Auser1, Auser2, Auser3, Auser4, Auser5) = checkLeaderboard(900, Apuntaje1, Apuntaje2, Apuntaje3, Apuntaje4, Apuntaje5, Anombre1, Anombre2, Anombre3, Anombre4, Anombre5);
-  }  
+  }  */
 }
 
 void loop() {
@@ -767,72 +795,142 @@ void loop() {
      
       Serial.println("Fallaste! Buena suerte la prox.");
       gameState = -1;
-      gameOverScreen();
+      endScreen(1);
 
       }
 
     delay(1000);
   }
   else if (gameState == 20){
-  drawHorsesGameBase();
-  xPos = 0;
+    xPos = 0;
+    for(int i = 0; i < 4; i++) { // Reseteo de variables del
+      hp.pos[i] = 0;
+      hp.posBefore[i] = 0;
+      hp.alreadyPressed[i] = false;
+      hp.points[i] = 0;
+      hp.ready[i] = false;
+    }
+    drawHorsesGameBase();
+    tft.setTextSize(3);
+    tft.setCursor((tft.width()- 162) / 2, 40);
+    tft.print("Jugadores");
+    tft.setTextSize(2);
+    tft.setCursor((tft.width()- 240) / 2, 70);
+    tft.print("Presionen sus teclas");
+    tft.setCursor((tft.width()- 144) / 2, 90);
+    tft.print("para empezar");
 
-  // Hacer parte de ingresado de nombres @sapato
-  // 3
-  tft.fillRect(tft.width()/2 - 50, tft.height()/2 - 50, 100, 100, ILI9341_WHITE);
-  tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
-  tft.setTextColor(ILI9341_RED);
-  tft.setTextSize(6);
-  tft.setCursor(tft.width()/2 - 18, tft.height()/2 - 20);
-  tft.print("3");
-  delay(1000);
-  // 2
-  tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
-  tft.setTextColor(ILI9341_ORANGE);
-  tft.setCursor(tft.width()/2 - 18, tft.height()/2 - 20);
-  tft.print("2");
-  delay(1000);
-  // 1
-  tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
-  tft.setTextColor(ILI9341_YELLOW);
-  tft.setCursor(tft.width()/2 - 18, tft.height()/2 - 20);
-  tft.print("1");
-  delay(1000);
-  // GO
-  tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
-  tft.setTextColor(ILI9341_GREEN);
-  tft.setTextSize(4);
-  tft.setCursor(tft.width()/2 - 25, tft.height()/2 - 15);
-  tft.print("GO");
-  delay(800);
-  tft.fillRect(tft.width()/2 - 50, tft.height()/2 - 50, 100, 100, ILI9341_DARKGREY);
-  barAttack = true;
-  gameState = 2;
-  
+    // CONFIRMACIÓN DE JUGADORES PARA INICIAR
+    while (!allHorsesReady) {
+      if (keypad.getKeys()) {
+        for (int i = 0; i < LIST_MAX; i++) {
+          if (keypad.key[i].stateChanged && keypad.key[i].kstate == PRESSED) {
+            char tecla = keypad.key[i].kchar;
+
+            // Buscar qué jugador corresponde
+            for (int j = 0; j < 4; j++) {
+              if (tecla == hp.keys[j]) {
+                hp.ready[j] = true;
+
+                // Feedback visual opcional:
+                tft.fillRect(40 + j * 70, 180, 40, 40, hp.colors[j]);
+              }
+            }
+          }
+        }
+      }
+    
+
+      // Comprobamos si alguno no está listo (mejor que si comprobamos si los 4 lo están)
+      allHorsesReady = true;
+      for (int j = 0; j < 4; j++) {
+        if (!hp.ready[j]) allHorsesReady = false;
+      }
+    }
+
+    tft.fillRect(40, 30, 240, 80, ILI9341_DARKGREY); // Borrado de mensaje
+    tft.fillRect(40, 180, 250, 40, ILI9341_DARKGREY); // Borrado de pantallitas de confirmación
+    // 3
+    tft.fillRect(tft.width()/2 - 50, tft.height()/2 - 50, 100, 100, ILI9341_WHITE);
+    tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
+    tft.setTextColor(ILI9341_RED);
+    tft.setTextSize(6);
+    tft.setCursor(tft.width()/2 - 18, tft.height()/2 - 20);
+    tft.print("3");
+    delay(1000);
+    // 2
+    tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
+    tft.setTextColor(ILI9341_ORANGE);
+    tft.setCursor(tft.width()/2 - 18, tft.height()/2 - 20);
+    tft.print("2");
+    delay(1000);
+    // 1
+    tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
+    tft.setTextColor(ILI9341_YELLOW);
+    tft.setCursor(tft.width()/2 - 18, tft.height()/2 - 20);
+    tft.print("1");
+    delay(1000);
+    // GO
+    tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
+    tft.setTextColor(ILI9341_GREEN);
+    tft.setTextSize(4);
+    tft.setCursor(tft.width()/2 - 25, tft.height()/2 - 15);
+    tft.print("GO");
+    delay(800);
+    tft.fillRect(tft.width()/2 - 50, tft.height()/2 - 50, 100, 100, ILI9341_DARKGREY);
+    gameState = 2;
+    
   }
   else if (gameState == 2){ // Juego N2: Carrera de caballos con 4 jugadores
 
-    xPos = 0;
-    if (barAttack == true){
+    while (horseRaceWinner == '0'){
       // Crear Barra de ataque
-      tft.fillRect(10 , tft.height() - 47.5, tft.width() - 20, 45, ILI9341_DARKGREY);
+      xPos = 0;
+      tft.fillRect(0, tft.height() - 47.5, tft.width(), 45, ILI9341_DARKGREY);
       tft.fillRect(10 , tft.height() - 40, tft.width() - 20, 30, ILI9341_BLACK);
       tft.fillRect(tft.width()/3 , tft.height() - 40, tft.width()/3, 30, ILI9341_GREEN);
       tft.fillRect(tft.width()/2 -10 , tft.height() - 40, 20, 30, ILI9341_YELLOW);
 
+      
       delay(500);
       attackHorseSistem();
-      for (int i = 0; i < numPlayers; i++) {
+      for (int i = 0; i < 4; i++) {
         Serial.print("Puntaje Player ");
         Serial.print(i + 1);
         Serial.print(": ");
-        Serial.print(horsesPoints[0][i]);
+        Serial.print(hp.pos[i]);
         Serial.print(", puntaje Anterior");
         Serial.print(": ");
-        Serial.println(horsesPoints[1][i]);
+        Serial.println(hp.posBefore[i]);
+      }
+    
+      drawHorsesRelativePos(hp.pos, hp.posBefore);
+    }
+    // JUEGO FINALIZADO, HUBO GANADOR
+    
+    for (int i; i < 4; i++){ // Buscar el color del ganador (solo para ponerlo en el print akjlsdkjl)
+      if (hp.keys[i] == horseRaceWinner){
+        winnerColor = hp.colors[i];
       }
     }
-    drawHorsesRelativePos(horsesPoints);
+    delay(1000);
+    tft.fillRect(20, 40, tft.width() - 40, 150, tft.color565(77, 77, 77));
+    tft.fillRect(30, 50, tft.width() - 60, 130, tft.color565(184, 184, 184));
+    tft.setCursor(40, 70);
+    tft.setTextColor(ILI9341_WHITE);
+    tft.setTextSize(3);
+    tft.print("Ganador de la");
+    tft.setCursor(90, 90);
+    tft.print("carrera:");
+    tft.setCursor(60, 130);
+    tft.setTextSize(4);
+    tft.print("Jugador");
+    tft.setCursor(240, 130);
+    tft.setTextColor(winnerColor);
+    tft.print(horseRaceWinner);
+    delay(5000);
+    gameState = -1;
+    endScreen(2);
   }
- 
+
 }
