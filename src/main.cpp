@@ -65,11 +65,11 @@ const uint16_t Z[11 * 11] PROGMEM = { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x
 const byte ROWS = 4;
 const byte COLS = 4;
 //Teclas del keypad en una matriz
-char keys[ROWS][COLS] = {
-  {'1','2','3','A'},
-  {'4','5','6','B'},
-  {'7','8','9','C'},
-  {'*','0','#','D'}
+char keys[ROWS][COLS] = { // Dado vuelta y puesto en base a nuestro diseño
+  {'D','C','B','A'},
+  {'#','9','8','7'},
+  {'0','6','5','4'},
+  {'*','3','2','1'}
 };
 
 int matrizSimon[3][3] = { // Esto es para obtener la fila y col del número para editar, creo que es lo más eficiente que podemos hacer
@@ -85,8 +85,8 @@ int colNumero = -1;
 const int RondasMaximas = 64;
 
 // Pines del Arduino conectados al teclado
-byte rowPins[ROWS] = {2, 3, 4, 5};  
-byte colPins[COLS] = {6, 7, 8 ,9};  
+byte rowPins[ROWS] = {9, 8, 7, 6};  
+byte colPins[COLS] = {5, 4, 3, 2};  
 
 // Configura la libreria con el Keypad
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
@@ -95,12 +95,12 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 int gameState = 0;
 
 //Ordena los valores de letra posibles en la seleccion de nombre (Leaderboard)
-char letras[26] = {
+const char Letras[26] = {
   'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'
 };
 
 //Contiene los nombres de los bitmaps de cada letra del array arriba ^, tienen que estar en el mismo orden para que el programa pueda saber que letra mostrar
-const uint16_t *letrasBitmap[26] = {
+const uint16_t *LetrasBitmap[26] = {
   A, B, C, D, E, F, G, H, I, J, K, L, M,
   N, O, P, Q, R, S, T, U, V, W, X, Y, Z
 };
@@ -132,8 +132,21 @@ int indexGame;
 int indexPlayer;
 
 //-----JUEGO CARRERA DE CABALLOS-----//
+struct horsesPlayers{
+  char keys[4];
+  uint16_t colors[4];
+  int pos[4];
+  int posBefore[4];
+  int points[4];
+  bool alreadyPressed[4];
+  bool ready[4];
+};
 int xPos;
 uint16_t winnerColor;
+horsesPlayers hp;
+char horseRaceWinner = '0';
+bool allHorsesReady = false;
+
 
 //-------------------- FUNCIONES --------------------//
 
@@ -187,10 +200,11 @@ void drawMarkerBar(int x, int y, int width, int height) {
 }
 
 void mostrarLetra(int pos, int letraN){
-  const uint16_t *letra = letrasBitmap[letraN];
-  drawScaledRGBBitmapFloat(tft, pos, 110, letra, 11, 11, 6);
+  const uint16_t *Letra = LetrasBitmap[letraN];
+  drawScaledRGBBitmapFloat(tft, pos, 110, Letra, 11, 11, 6);
 }
 
+// Función para escribir nombre
 String selectName(){
   String name = "";
   Serial.print("Pon tus iniciales");
@@ -231,7 +245,7 @@ String selectName(){
         }
         //Se presiona Enter
         else if (key == '7'){
-          name += letras[letraN];
+          name += Letras[letraN];
           Serial.print(name);
           selec = true;
         }
@@ -355,6 +369,7 @@ void checkLeaderboard(int puntaje, user &userV1, user &userV2, user &userV3, use
   showLeaderboard(userV1, userV2, userV3, userV4, userV5);
 }
 
+// Pantalla que se muestra al finalizar los juegos
 void endScreen(int game){
   int opcSelec = 1;
   int opcShowing = 2;
@@ -394,15 +409,23 @@ void endScreen(int game){
     char key = keypad.getKey();
    
     if (key) {
-      if (key == '4' && opcSelec > 1){
+      if (key == '#' && opcSelec > 1){
         opcSelec -= 1;
+        Serial.println(opcSelec);
       }
       else if (key == '*' && opcSelec < 3){
         opcSelec += 1;
+        Serial.println(opcSelec);
       }
-      else if (key == '7'){
-        if (opcSelec == 1){
+      else if (key == '0'){
+        if (opcSelec == 3){ // Menu
+          gameState = 0;
+        }
+        else if (opcSelec == 2){ // Volver a jugar
           gameState = game * 10;
+        }
+        else if (opcSelec == 1){ // Leaderboard
+          gameState = 30;
         }
         else{
           gameState = 0;
@@ -412,18 +435,31 @@ void endScreen(int game){
 
     if (opcSelec == 1 && opcShowing == 2){
       opcShowing = 1;
-      tft.fillRect((tft.width()- 168)/2 - 20, 150, 10, 10, ILI9341_WHITE);
-      tft.fillRect((tft.width()- 120)/2 - 20, 120, 10 , 10, screenColor);
+      tft.fillRect((tft.width()- 168)/2 - 20, 180, 10, 10, ILI9341_WHITE);
+      tft.fillRect((tft.width()- 168)/2 - 20, 150, 10, 10, screenColor);
+      
+      Serial.println("Borrado: opc 2");
     }
     else if (opcSelec == 2 && (opcShowing == 1 || opcShowing == 3)){
+      
+      if (opcShowing == 1){
+        tft.fillRect((tft.width()- 168)/2 - 20, 180, 10 , 10, screenColor);
+        Serial.println("Borrado: opc 1");
+      }
+      else{
+        tft.fillRect((tft.width()- 120)/2 - 20, 120, 10 , 10, screenColor);
+      
+        Serial.println("Borrado: opc 3");
+      }
       opcShowing = 2;
-      tft.fillRect((tft.width()- 120)/2 - 20, 120, 10 , 10, ILI9341_WHITE);
-      tft.fillRect((tft.width()- 168)/2 - 20, 150, 10, 10, screenColor);
+      tft.fillRect((tft.width()- 168)/2 - 20, 150, 10 , 10, ILI9341_WHITE);
     }
     else if (opcSelec == 3 && opcShowing == 2){
-      opcShowing = 2;
-      tft.fillRect((tft.width()- 120)/2 - 20, 180, 10 , 10, screenColor);
-      tft.fillRect((tft.width()- 168)/2 - 20, 150, 10, 10, ILI9341_WHITE);
+      opcShowing = 3;
+      tft.fillRect((tft.width()- 120)/2 - 20, 120, 10 , 10, ILI9341_WHITE);
+      tft.fillRect((tft.width()- 168)/2 - 20, 150, 10, 10, screenColor);
+
+      Serial.println("Borrado: opc 2");
     }
   }
 }
@@ -447,13 +483,13 @@ int menu(int cantJuegos) {
     char key = keypad.getKey();
    
     if (key) {
-      if (key == '4' && juegoSelec < cantJuegos){
+      if (key == '#' && juegoSelec < cantJuegos){
         juegoSelec += 1;
       }
       else if (key == '*' && juegoSelec > 1){
         juegoSelec -= 1;
       }
-      else if (key == '7'){
+      else if (key == '0'){
         end = 1;
         juegoSelec *= 10;
       }
@@ -576,18 +612,6 @@ int drawSquareSimonGame(int num, int pressed){
   return num;
 }
 
-struct horsesPlayers{
-  char keys[4];
-  uint16_t colors[4];
-  int pos[4];
-  int posBefore[4];
-  int points[4];
-  bool alreadyPressed[4];
-  bool ready[4];
-};
-horsesPlayers hp;
-char horseRaceWinner = '0';
-bool allHorsesReady = false;
 
 void drawHorsesRelativePos(int points[4], int pointsBefore[4]){
 
@@ -609,13 +633,9 @@ void drawHorsesRelativePos(int points[4], int pointsBefore[4]){
 void drawHorsesGameBase(){
   tft.fillScreen(ILI9341_DARKGREY);
   drawHorsesRelativePos(hp.pos, hp.posBefore);
- 
-  // Dibujo de caballos
   
- 
   // Dibujo de la meta
   drawMarkerBar(tft.width() - 30, 15, 20, 160);
-
 
 }
 
@@ -652,7 +672,7 @@ void attackHorseSistem(){
                         hp.pos[j] += 2;
                         hp.points[j] += 5;
                     }
-                  if (hp.pos[j] > 50){
+                  if (hp.pos[j] > 5){
                     horseRaceWinner = hp.keys[j];
                     Serial.print("GANADORRRRRR: ");
                     Serial.println(hp.keys[j]);
@@ -740,9 +760,9 @@ void setup() {
   }
 
   hp.keys[0] = 'A';
-  hp.keys[1] = '3';
-  hp.keys[2] = '2';
-  hp.keys[3] = '1';
+  hp.keys[1] = 'B';
+  hp.keys[2] = 'C';
+  hp.keys[3] = 'D';
   hp.colors[0] = ILI9341_RED;
   hp.colors[1] = ILI9341_YELLOW;
   hp.colors[2] = ILI9341_GREEN;
@@ -850,6 +870,8 @@ void loop() {
   }
   else if (gameState == 20){
     xPos = 0;
+    horseRaceWinner = '0';
+    allHorsesReady = false;
     for(int i = 0; i < 4; i++) { // Reseteo de variables del
       hp.pos[i] = 0;
       hp.posBefore[i] = 0;
@@ -973,7 +995,7 @@ void loop() {
     tft.setTextSize(4);
     tft.print("Jugador");
     tft.fillRect(240,130, 30,30, winnerColor);
-    delay(5000);
+    delay(3000);
     gameState = -1;
     endScreen(2);
   }

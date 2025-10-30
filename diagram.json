@@ -13,8 +13,9 @@
     },
     { "type": "wokwi-membrane-keypad",
       "id": "keypad1",
-      "top": -400,
+      "top": 200,
       "left": 470,
+      "rotate": 180,
       "attrs": {} },
   
     {
@@ -75,14 +76,14 @@
     }
   ],
   "connections": [
-    [ "keypad1:R1", "mega:2", "#8f4814", [ "h-0", "v-30" ] ],
-    [ "keypad1:R2", "mega:3", "orange", [ "h-0", "v-28.8" ] ],
-    [ "keypad1:R3", "mega:4", "gold", [ "h-0", "v-28.8" ] ],
-    [ "keypad1:R4", "mega:5", "blue", [ "h-0", "v-28.8" ] ],
-    [ "keypad1:C1", "mega:6", "green", [ "h-0", "v-28.8" ] ],
-    [ "keypad1:C2", "mega:7", "violet", [ "h-0", "v-28.8" ] ],
-    [ "keypad1:C3", "mega:8", "gray", [ "h-0", "v-28.8" ] ],
-    [ "keypad1:C4", "mega:9", "blue", [ "h-0", "v-28.8" ] ],
+    [ "keypad1:R1", "mega:9", "#8f4814", [ "h-0", "v-30" ] ],
+    [ "keypad1:R2", "mega:8", "orange", [ "h-0", "v-28.8" ] ],
+    [ "keypad1:R3", "mega:7", "gold", [ "h-0", "v-28.8" ] ],
+    [ "keypad1:R4", "mega:6", "blue", [ "h-0", "v-28.8" ] ],
+    [ "keypad1:C1", "mega:5", "green", [ "h-0", "v-28.8" ] ],
+    [ "keypad1:C2", "mega:4", "violet", [ "h-0", "v-28.8" ] ],
+    [ "keypad1:C3", "mega:3", "gray", [ "h-0", "v-28.8" ] ],
+    [ "keypad1:C4", "mega:2", "blue", [ "h-0", "v-28.8" ] ],
     [ "lcd1:GND", "mega:GND.3", "black", [ "h124.8", "v-28.8", "h83.7" ] ],
     [ "mega:3.3V", "lcd1:VCC", "red", [ "h-16.5", "v79" ] ],
     [ "mega:3.3V", "lcd1:LED", "red", [ "h-179.7", "v2.2" ] ],
