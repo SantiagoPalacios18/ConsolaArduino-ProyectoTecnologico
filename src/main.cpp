@@ -482,7 +482,7 @@ int menu(int cantJuegos) {
       tft.drawRGBBitmap(tft.width()/2 - 128, 128, logoSimonDice, 64, 64);
       tft.drawRGBBitmap(tft.width()/2 - 32, 128, logoSimonDice_select, 64, 64);
       tft.drawRGBBitmap(tft.width()/2 + 64, 128, logoSimonDice, 64, 64);
-      Serial.print(key);
+      Serial.print(key); 
     }
 
     else if (juegoSelec == 3 && (showGame == 1 || showGame == 2)) {
@@ -502,6 +502,50 @@ int menu(int cantJuegos) {
   return juegoSelec;
 }
 
+int selecLB(int cantLB){
+  tft.fillScreen(ILI9341_BLACK);
+  int end = 0;
+  int lbSelec = 1;
+  bool print = true;
+
+  while(end == 0){
+    char key = keypad.getKey();
+   
+    if (key) {
+      if (key == '4' && lbSelec < cantLB){
+        lbSelec += 1;
+      }
+      else if (key == '*' && lbSelec > 1){
+        lbSelec -= 1;
+      }
+      else if (key == '7'){
+        end = 1;
+      }
+    }
+
+    if(lbSelec == 1 && print != false){
+      tft.fillRect(46, 16, 228, 24, 0x0000);
+      tft.setTextSize(2);
+      tft.setTextColor(ILI9341_WHITE);
+      tft.setCursor((tft.width() - 228) / 2, 16);
+      tft.println("Carrera de caballos");
+      tft.drawRGBBitmap(tft.width()/2 - 128, 128, logoSimonDice_select, 64, 64);
+      tft.drawRGBBitmap(tft.width()/2 + 64, 128, logoSimonDice, 64, 64);
+      print = false;
+    }
+    else if(lbSelec == 2 && print != true){
+      tft.fillRect(46, 16, 228, 24, 0x0000);
+      tft.setTextSize(3);
+      tft.setTextColor(ILI9341_WHITE);
+      tft.setCursor((tft.width() - 180) / 2, 16);
+      tft.println("Simon dice");
+      tft.drawRGBBitmap(tft.width()/2 - 128, 128, logoSimonDice, 64, 64);
+      tft.drawRGBBitmap(tft.width()/2 + 64, 128, logoSimonDice_select, 64, 64);
+      print = true;
+    }
+  }
+  return(lbSelec);
+}
 
 int drawSquareSimonGame(int num, int pressed){
   // Encontrar fila y columna del número
@@ -932,6 +976,9 @@ void loop() {
     delay(5000);
     gameState = -1;
     endScreen(2);
+  }
+  else if(gameState == 30){
+    int seleccion = selecLB(2);
   }
 
 }
