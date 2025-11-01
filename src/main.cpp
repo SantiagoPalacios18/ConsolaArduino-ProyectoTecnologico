@@ -140,6 +140,8 @@ struct horsesPlayers{
   int points[4];
   bool alreadyPressed[4];
   bool ready[4];
+  int onTrap[4];
+  int trapsPos[4][2];
 };
 int xPos;
 uint16_t winnerColor;
@@ -612,28 +614,26 @@ int drawSquareSimonGame(int num, int pressed){
   return num;
 }
 
+int horsesPosMultiplier = 5;
 
 void drawHorsesRelativePos(int points[4], int pointsBefore[4]){
 
-  int multiplier = 5;
+
   // Borrado eficiente de caballos anteriores en posiciones anteriores
   for (int i = 0; i < 4; i++){ 
     if (points[i] != pointsBefore[1]){  // Si la posicion actual es desigual a la posicion anterior (O sea que se movió)
-      tft.fillRect(10 + pointsBefore[i] * multiplier, 20 + i * 40, 30, 20, ILI9341_DARKGREY); // Limpiar posición anterior
+      tft.fillRect(10 + pointsBefore[i] * horsesPosMultiplier, 20 + i * 40, 30, 20, ILI9341_DARKGREY); // Borra posición anterior
+      tft.fillRect(10 + points[i] * horsesPosMultiplier, 20 + i * 40, 30, 20, hp.colors[i]); // Crea la nueva
     }
   }
 
-
-  tft.fillRect(10 + points[0] * multiplier, 20, 30, 20, hp.colors[0]);
-  tft.fillRect(10 + points[1] * multiplier, 60, 30, 20, hp.colors[1]);
-  tft.fillRect(10 + points[2] * multiplier, 100, 30, 20, hp.colors[2]);
-  tft.fillRect(10 + points[3] * multiplier, 140, 30, 20, hp.colors[3]);
 }
 
 void drawHorsesGameBase(){
   tft.fillScreen(ILI9341_DARKGREY);
-  drawHorsesRelativePos(hp.pos, hp.posBefore);
-  
+  for (int i = 0; i < 4; i++){ 
+    tft.fillRect(10 + hp.pos[i] * horsesPosMultiplier, 20 + i*40, 30, 20, hp.colors[i]); // Crea la nueva
+  }
   // Dibujo de la meta
   drawMarkerBar(tft.width() - 30, 15, 20, 160);
 
@@ -659,20 +659,26 @@ void attackHorseSistem(){
           // Buscar qué jugador corresponde
           for (int j = 0; j < 4; j++) {
             if (tecla == hp.keys[j]) {
-              if (estado == PRESSED && hp.alreadyPressed[j] == false) { // Se encuentra la tecla presionada
+              if (estado == PRESSED && hp.alreadyPressed[j] == false) { // Si la tecla está presionada y si no se ha tocado antes
 
                 hp.alreadyPressed[j] = true;
                 tft.fillRect(10 + xPos, tft.height() - 47.5, 10, 45, hp.colors[j]);
                 
-                hp.posBefore[j] = hp.pos[j]; // guarda puntaje anterior
-                if (xPos >= 8 * 12 && xPos <= 16 * 12){
+                hp.posBefore[j] = hp.pos[j]; // guarda puntaje anterior (para borrado eficiente)
+
+                if (xPos >= 8 * 12 && xPos <= 16 * 12){ // ESTÁ DENTRO DE LA ZONA VERDE
+                  if (hp.onTrap[j] == 0){ // Solo le suma puntos si no está en la trampa
                     hp.pos[j]++;
                     hp.points[j]++;
-                    if (xPos >= 11 * 12 && xPos <= 13 * 12){
-                        hp.pos[j] += 2;
-                        hp.points[j] += 5;
+                  }
+                  if (xPos >= 11 * 12 && xPos <= 13 * 12){ // ESTÁ EN LA ZONA AMARILLA
+                    hp.pos[j] += 2;
+                    hp.points[j] += 5;
+                    if (hp.onTrap[j] > 0){ // Está en trampa 1 o 2
+                      hp.pos[j] += 8;
                     }
-                  if (hp.pos[j] > 5){
+                  }
+                  if (hp.pos[j] > 50){
                     horseRaceWinner = hp.keys[j];
                     Serial.print("GANADORRRRRR: ");
                     Serial.println(hp.keys[j]);
@@ -917,8 +923,32 @@ void loop() {
       }
     }
 
+    
+
     tft.fillRect(40, 30, 240, 80, ILI9341_DARKGREY); // Borrado de mensaje
     tft.fillRect(40, 180, 250, 40, ILI9341_DARKGREY); // Borrado de pantallitas de confirmación
+    delay(500);
+
+    
+    // CALCULO Y DIBUJADO DE VALLAS
+    for (int i = 0; i < 4; i++){ // Para cada caballo
+      for (int j = 0; j < 2; j++){ // Cantidad de vallas
+        if (j == 0) // Para la primera trampa:
+          hp.trapsPos[i][j] = random(5,25); // La primera mitad
+        else{ // Y para la segunda trampa
+          hp.trapsPos[i][j] = random(25,45); // La segunda
+          int Margin = 15; // Para ver si estan muy cerca, en ese caso cambiarle la posición a la 2da trampa
+          while (hp.trapsPos[i][j - 1] > hp.trapsPos[i][j] - Margin && hp.trapsPos[i][j - 1] < hp.trapsPos[i][j] + Margin){
+            hp.trapsPos[i][j] = random(25,45);
+          }
+        }
+        tft.fillRect(40 + hp.trapsPos[i][j] * horsesPosMultiplier, 15 + i*40, 10, 30, ILI9341_BLACK);
+      }
+
+    }
+    delay(500);
+
+
     // 3
     tft.fillRect(tft.width()/2 - 50, tft.height()/2 - 50, 100, 100, ILI9341_WHITE);
     tft.fillRect(tft.width()/2 - 40, tft.height()/2 - 40, 80, 80, ILI9341_BLACK);
@@ -947,6 +977,11 @@ void loop() {
     tft.print("GO");
     delay(800);
     tft.fillRect(tft.width()/2 - 50, tft.height()/2 - 50, 100, 100, ILI9341_DARKGREY);
+    for (int i = 0; i < 4; i++){ // Para cada caballo
+      for (int j = 0; j < 2; j++){ // Cantidad de vallas
+        tft.fillRect(40 + hp.trapsPos[i][j] * horsesPosMultiplier, 15 + i*40, 10, 30, ILI9341_BLACK);
+      }
+    }
     gameState = 2;
     
   }
@@ -960,7 +995,27 @@ void loop() {
       tft.fillRect(tft.width()/3 , tft.height() - 40, tft.width()/3, 30, ILI9341_GREEN);
       tft.fillRect(tft.width()/2 -10 , tft.height() - 40, 20, 30, ILI9341_YELLOW);
 
-      
+      for (int i = 0; i < 4; i++){ // Para cada caballo
+        hp.onTrap[i] = 0; // Reinicia el estado antes de chequear las trampas
+        Serial.print("Jugador ");
+        Serial.print(i);
+        Serial.print(" : ");
+        Serial.println(hp.pos[i]);
+        for (int j = 0; j < 2; j++){ // Para cada trampa
+          Serial.print("Trampa ");
+          Serial.print(j);
+          Serial.print(" : ");
+          Serial.println(hp.trapsPos[i][j]);
+          if (hp.pos[i] > hp.trapsPos[i][j] - 3 && hp.pos[i] <  hp.trapsPos[i][j] + 1){ 
+            hp.onTrap[i] = j + 1;
+            Serial.println("EN TRAMPA");
+            break;
+          }
+        }
+        if (hp.onTrap[i] == 0){
+          Serial.println("FUERA DE LA TRAMPA");
+        }
+      }
       delay(500);
       attackHorseSistem();
       for (int i = 0; i < 4; i++) {
