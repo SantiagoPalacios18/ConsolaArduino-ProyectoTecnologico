@@ -956,7 +956,7 @@ void loop() {
             hp.trapsPos[i][j] = random(25,45);
           }
         }
-        tft.fillRect(40 + hp.trapsPos[i][j] * horsesPosMultiplier, 15 + i*40, 10, 30, ILI9341_BLACK);
+        tft.fillRect(40 + hp.trapsPos[i][j] * horsesPosMultiplier, 15 + i*40, 10, 30, ILI9341_WHITE);
       }
 
     }
@@ -993,7 +993,7 @@ void loop() {
     tft.fillRect(tft.width()/2 - 50, tft.height()/2 - 50, 100, 100, ILI9341_DARKGREY);
     for (int i = 0; i < 4; i++){ // Para cada caballo
       for (int j = 0; j < 2; j++){ // Cantidad de vallas
-        tft.fillRect(40 + hp.trapsPos[i][j] * horsesPosMultiplier, 15 + i*40, 10, 30, ILI9341_BLACK);
+        tft.fillRect(40 + hp.trapsPos[i][j] * horsesPosMultiplier, 15 + i*40, 10, 30, ILI9341_WHITE);
       }
     }
     gameState = 2;
