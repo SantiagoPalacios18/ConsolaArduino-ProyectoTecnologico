@@ -690,6 +690,7 @@ void attackHorseSistem(){
                     hp.points[j] += 5;
                     if (hp.onTrap[j] > 0){ // Está en trampa 1 o 2
                       hp.pos[j] += 8;
+                      hp.points[j] += 5;
                     }
                   }
                   if (hp.pos[j] > 50){
