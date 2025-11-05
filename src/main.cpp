@@ -170,16 +170,6 @@ void loadLB(user &user1, user &user2, user &user3, user &user4, user &user5, int
   EEPROM.get(user5dir, user5);
 }
 
-int loadP(user user1, user user2, user user3, user user4, user user5){
-  int puntaje1 = user1.puntaje; int puntaje2 = user2.puntaje; int puntaje3 = user3.puntaje; int puntaje4 = user4.puntaje; int puntaje5 = user5.puntaje;
-  return(puntaje1, puntaje2, puntaje3, puntaje4, puntaje5);
-}
-
-String loadN(user user1, user user2, user user3, user user4, user user5){
-  String nombre1 = user1.nombre; String nombre2 = user2.nombre; String nombre3 = user3.nombre; String nombre4 = user4.nombre; String nombre5 = user5.nombre;
-  return(nombre1, nombre2, nombre3, nombre4, nombre5);
-}
-
 // FUNCION para escalar bitmaps, lo dejamos acá por comodidad
 void drawScaledRGBBitmapFloat(Adafruit_ILI9341 &tft, int16_t x, int16_t y, const uint16_t *bitmap, int16_t w, int16_t h, float scale) {
   for (int16_t j = 0; j < int(h * scale); j++) {
@@ -772,12 +762,6 @@ void setup() {
   else{
     loadLB(Auser1, Auser2, Auser3, Auser4, Auser5, Auser1dir, Auser2dir, Auser3dir, Auser4dir, Auser5dir);
     loadLB(Buser1, Buser2, Buser3, Buser4, Buser5, Buser1dir, Buser2dir, Buser3dir, Buser4dir, Buser5dir);
-    
-    (Apuntaje1, Apuntaje2, Apuntaje3, Apuntaje4, Apuntaje5) = loadP(Auser1, Auser2, Auser3, Auser4, Auser5);
-    (Bpuntaje1, Bpuntaje2, Bpuntaje3, Bpuntaje4, Bpuntaje5) = loadP(Buser1, Buser2, Buser3, Buser4, Buser5);
-
-    (Anombre1, Anombre2, Anombre3, Anombre4, Anombre5) = loadN(Auser1, Auser2, Auser3, Auser4, Auser5);
-    (Bnombre1, Bnombre2, Bnombre3, Bnombre4, Bnombre5) = loadN(Buser1, Buser2, Buser3, Buser4, Buser5);
   }
 
   hp.keys[0] = 'A';
@@ -1049,9 +1033,11 @@ void loop() {
 
     }
     // JUEGO FINALIZADO, HUBO GANADOR
+    int puntajeGanador;
     for (int i; i < 4; i++){
       if (hp.keys[i] == horseRaceWinner){
         winnerColor = hp.colors[i];
+        puntajeGanador = hp.points[i];
       }
     }
     delay(1000);
@@ -1070,7 +1056,7 @@ void loop() {
     delay(3000);
     gameState = -1;
 
-    checkLeaderboard(hp.points[1], Buser1, Auser2, Auser3, Auser4, Auser5);
+    checkLeaderboard(puntajeGanador, Buser1, Buser2, Buser3, Buser4, Buser5);
     endScreen(2);
   }
   else if(gameState == 30){
