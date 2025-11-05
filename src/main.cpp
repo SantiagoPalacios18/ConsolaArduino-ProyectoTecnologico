@@ -149,6 +149,10 @@ horsesPlayers hp;
 char horseRaceWinner = '0';
 bool allHorsesReady = false;
 
+int horsesPosMultiplier = 5;
+
+
+
 
 //-------------------- FUNCIONES --------------------//
 
@@ -224,7 +228,7 @@ String selectName(){
       char key = keypad.getKey();
       //Se presiona la flecha ->
       if (key){
-        if (key == '4'){
+        if (key == '#'){
           if (letraN == 25){
             letraN = 0;
           }
@@ -246,7 +250,7 @@ String selectName(){
           letraM = false;
         }
         //Se presiona Enter
-        else if (key == '7'){
+        else if (key == '0'){
           name += Letras[letraN];
           Serial.print(name);
           selec = true;
@@ -258,6 +262,7 @@ String selectName(){
 }
 
 void showLeaderboard(user user1, user user2, user user3, user user4, user user5){
+  tft.fillScreen(ILI9341_CASET);
   tft.setTextSize(4);
   tft.setCursor(40, 10);
     tft.println("LEADERBOARD");
@@ -292,9 +297,22 @@ void showLeaderboard(user user1, user user2, user user3, user user4, user user5)
     else if(i == 10){tft.println(user5.puntaje);}
   }
 
+  bool end = false;
+
+  while(end != true){
+    char key = keypad.getKey();
+    if(key){
+      if (key == '0'){
+        end = true;
+      }
+    }
+  }
+
 }
 
 void checkLeaderboard(int puntaje, user &userV1, user &userV2, user &userV3, user &userV4, user &userV5) {
+  tft.fillScreen(ILI9341_CASET);
+
   int p1 = userV1.puntaje; String n1 = userV1.nombre;
   int p2 = userV2.puntaje; String n2 = userV2.nombre;
   int p3 = userV3.puntaje; String n3 = userV3.nombre;
@@ -367,7 +385,6 @@ void checkLeaderboard(int puntaje, user &userV1, user &userV2, user &userV3, use
   Serial.print(userV4.nombre); Serial.print(" "); Serial.print(userV4.puntaje); Serial.print(" ");
   Serial.print(userV5.nombre); Serial.print(" "); Serial.print(userV5.puntaje); Serial.print(" ");
 
-  tft.fillScreen(ILI9341_BLACK);
   showLeaderboard(userV1, userV2, userV3, userV4, userV5);
 }
 
@@ -541,7 +558,6 @@ int menu(int cantJuegos) {
 }
 
 int selecLB(int cantLB){
-  tft.fillScreen(ILI9341_BLACK);
   int end = 0;
   int lbSelec = 1;
   bool print = true;
@@ -550,13 +566,13 @@ int selecLB(int cantLB){
     char key = keypad.getKey();
    
     if (key) {
-      if (key == '4' && lbSelec < cantLB){
+      if (key == '#' && lbSelec < cantLB){
         lbSelec += 1;
       }
       else if (key == '*' && lbSelec > 1){
         lbSelec -= 1;
       }
-      else if (key == '7'){
+      else if (key == '0'){
         end = 1;
       }
     }
@@ -613,8 +629,6 @@ int drawSquareSimonGame(int num, int pressed){
  
   return num;
 }
-
-int horsesPosMultiplier = 5;
 
 void drawHorsesRelativePos(int points[4], int pointsBefore[4]){
 
@@ -985,6 +999,7 @@ void loop() {
     gameState = 2;
     
   }
+
   else if (gameState == 2){ // Juego N2: Carrera de caballos con 4 jugadores
 
     while (horseRaceWinner == '0'){
@@ -1029,9 +1044,10 @@ void loop() {
       }
     
       drawHorsesRelativePos(hp.pos, hp.posBefore);
+
+
     }
     // JUEGO FINALIZADO, HUBO GANADOR
-    
     for (int i; i < 4; i++){
       if (hp.keys[i] == horseRaceWinner){
         winnerColor = hp.colors[i];
@@ -1052,10 +1068,21 @@ void loop() {
     tft.fillRect(240,130, 30,30, winnerColor);
     delay(3000);
     gameState = -1;
+
+    checkLeaderboard(hp.points[1], Buser1, Auser2, Auser3, Auser4, Auser5);
     endScreen(2);
   }
   else if(gameState == 30){
+    tft.fillScreen(ILI9341_BLACK);
     int seleccion = selecLB(2);
+    if (seleccion == 1){
+      showLeaderboard(Buser1, Buser2, Buser3, Buser4, Buser5);
+    }
+    else if (seleccion == 2){
+      showLeaderboard(Auser1, Auser2, Auser3, Auser4, Auser5);
+    }
+
+    gameState = 0;
   }
 
 }
