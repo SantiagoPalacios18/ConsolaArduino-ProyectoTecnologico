@@ -7,9 +7,9 @@
 //-------------------- VARIABLES & CONSTANTES --------------------//
 
 //Valores de los pines de la placa que se conectan a los de la pantalla TFT
-const int CSv = 45;
-const int RSTv = 47;
-const int DCv = 49;
+const int CSv = 25;
+const int RSTv = 27;
+const int DCv = 29;
 const int MOSIv = 51;
 const int SCKv = 52;
 const int MISOv = 50;
