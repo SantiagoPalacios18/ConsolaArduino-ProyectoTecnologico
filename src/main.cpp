@@ -202,6 +202,7 @@ void mostrarLetra(int pos, int letraN){
 
 // Función para escribir nombre
 String selectName(){
+  tft.fillScreen(ILI9341_CASET);
   String name = "";
   Serial.print("Pon tus iniciales");
   tft.setCursor(40, 50);
@@ -301,13 +302,23 @@ void showLeaderboard(user user1, user user2, user user3, user user4, user user5)
 }
 
 void checkLeaderboard(int puntaje, user &userV1, user &userV2, user &userV3, user &userV4, user &userV5) {
-  tft.fillScreen(ILI9341_CASET);
 
   int p1 = userV1.puntaje; String n1 = userV1.nombre;
   int p2 = userV2.puntaje; String n2 = userV2.nombre;
   int p3 = userV3.puntaje; String n3 = userV3.nombre;
   int p4 = userV4.puntaje; String n4 = userV4.nombre;
   int p5 = userV5.puntaje; String n5 = userV5.nombre;
+  
+  int puntajes[] = {p1, p2, p3, p4, p5};
+  bool highscore = false;
+
+  for (int i = 0; i < 5; i++) {
+    if (puntaje > puntajes[i]) {
+      highscore = true;
+      break;
+    }
+  }
+
   if (puntaje > p1){
     p5 = p4;
     p4 = p3;
@@ -353,29 +364,24 @@ void checkLeaderboard(int puntaje, user &userV1, user &userV2, user &userV3, use
     String nombre = selectName();
     n5 = nombre;
   }
+  if (highscore == true){
+    n1.toCharArray(userV1.nombre, sizeof(userV1.nombre));
+    userV1.puntaje = p1;
 
-  n1.toCharArray(userV1.nombre, sizeof(userV1.nombre));
-  userV1.puntaje = p1;
+    n2.toCharArray(userV2.nombre, sizeof(userV2.nombre));
+    userV2.puntaje = p2;
 
-  n2.toCharArray(userV2.nombre, sizeof(userV2.nombre));
-  userV2.puntaje = p2;
+    n3.toCharArray(userV3.nombre, sizeof(userV3.nombre));
+    userV3.puntaje = p3;
 
-  n3.toCharArray(userV3.nombre, sizeof(userV3.nombre));
-  userV3.puntaje = p3;
+    n4.toCharArray(userV4.nombre, sizeof(userV4.nombre));
+    userV4.puntaje = p4;
 
-  n4.toCharArray(userV4.nombre, sizeof(userV4.nombre));
-  userV4.puntaje = p4;
+    n5.toCharArray(userV5.nombre, sizeof(userV5.nombre));
+    userV5.puntaje = p5;
 
-  n5.toCharArray(userV5.nombre, sizeof(userV5.nombre));
-  userV5.puntaje = p5;
-
-  Serial.print(userV1.nombre); Serial.print(" "); Serial.print(userV1.puntaje); Serial.print(" ");
-  Serial.print(userV2.nombre); Serial.print(" "); Serial.print(userV2.puntaje); Serial.print(" "); 
-  Serial.print(userV3.nombre); Serial.print(" "); Serial.print(userV3.puntaje); Serial.print(" "); 
-  Serial.print(userV4.nombre); Serial.print(" "); Serial.print(userV4.puntaje); Serial.print(" ");
-  Serial.print(userV5.nombre); Serial.print(" "); Serial.print(userV5.puntaje); Serial.print(" ");
-
-  showLeaderboard(userV1, userV2, userV3, userV4, userV5);
+    showLeaderboard(userV1, userV2, userV3, userV4, userV5);
+  }
 }
 
 // Pantalla que se muestra al finalizar los juegos
